@@ -1,0 +1,22 @@
+<%- include('partials/head') %>
+
+<div class="auth-wrap auth-wrap-single">
+  <div class="auth-box">
+    <img class="auth-logo auth-logo-always" src="/static/img/logo.png" alt="الوادي لقطع غيار السيارات" width="260" height="53">
+    <h1>تسجيل الدخول</h1>
+    <p class="auth-sub">نظام المستودع</p>
+    <% if (error) { %><div class="alert alert-danger" role="alert"><%- icon('alert') %><span><%= error %></span></div><% } %>
+
+    <form method="post" action="/login" class="form" autocomplete="on">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label for="username">اسم المستخدم</label>
+      <input class="input" id="username" name="username" type="text" value="<%= username %>" dir="ltr"
+             autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required autofocus>
+      <label for="password">كلمة المرور</label>
+      <input class="input" id="password" name="password" type="password" dir="ltr" autocomplete="current-password" required>
+      <button type="submit" class="btn btn-primary btn-block">دخول</button>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/foot') %>

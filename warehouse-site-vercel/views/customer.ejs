@@ -1,0 +1,42 @@
+<%- include('partials/head', { nav: 'whatsapp', wide: true }) %>
+
+<a class="back" href="/admin/customers"><%- icon('back') %> رجوع لتقارير الفواتير</a>
+
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>العميل <span dir="ltr"><%= number %></span></h1>
+    <% if (data) { %>
+      <p class="page-sub">
+        <% if (data.group) { %>قروبه: <strong><%= data.group %></strong><% } else { %><span class="text-danger">ما له قروب واتساب صالح برقمه</span><% } %>
+        <% if (data.info && data.info.repName) { %> · المندوب: <strong><%= data.info.repName %></strong><% } %>
+      </p>
+    <% } %>
+  </div>
+</div>
+
+<% if (!data) { %>
+  <section class="card"><p><%- icon('alert') %> بيانات التقرير ما وصلت من برنامج الواتساب للحين</p></section>
+<% } else { %>
+<section class="card">
+  <div class="card-title"><span class="card-icon"><%- icon('file') %></span><h2>كل مستنداته (<%= data.history.length %>)</h2></div>
+  <% if (!data.history.length) { %><p class="card-sub card-sub-end">ما انرسل له شي للحين</p><% } else { %>
+    <div class="branch-scroll">
+      <table class="branch-table">
+        <thead><tr><th>الوقت</th><th>النوع</th><th>الحالة</th><th>التفاصيل</th></tr></thead>
+        <tbody>
+          <% data.history.forEach(function (h) { %>
+            <tr>
+              <td><%= formatRiyadh(h.at) %></td>
+              <td><%= h.typeLabel %></td>
+              <td><% if (h.status === 'sent') { %><span class="text-success">انرسل</span><% } else if (h.status === 'review') { %><span class="text-danger">ما انرسل (تحتاج مراجعة)</span><% } else if (h.status === 'cash') { %>نقدي<% } else if (h.status === 'stopped') { %>موقوف<% } else { %><%= h.status %><% } %></td>
+              <td class="td-start"><%= h.group ? 'قروب: ' + h.group : (h.reason || h.file || '') %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+<% } %>
+
+<%- include('partials/foot') %>

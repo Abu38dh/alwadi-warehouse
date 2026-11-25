@@ -1,0 +1,12 @@
+node_modules/
+.wwebjs_auth/
+.wwebjs_cache/
+*.log
+.baileys_auth/
+devices.json
+relay-jobs.json
+client-device.json
+outbox/
+warehouse-outbox/
+client-package/
+dist/

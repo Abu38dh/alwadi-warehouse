@@ -1,0 +1,41 @@
+<% if (user) { %>
+    </main>
+  </div>
+</div>
+<%
+  var isAdminF = user.role === 'admin';
+  var ncF = locals.navCounts || {};
+  var curF = locals.nav || '';
+  function tab(key, href, label, ic, badge, alert) {
+    var active = key === curF;
+    return '<a href="' + href + '" class="tab-link' + (active ? ' active' : '') + '"' + (active ? ' aria-current="page"' : '') + '>'
+      + '<span class="tab-icon">' + icon(ic) + (badge ? '<span class="nav-badge">' + badge + '</span>' : '') + (alert ? '<span class="nav-dot" aria-label="واتساب الشركة غير متصل"></span>' : '') + '</span>'
+      + '<span>' + label + '</span></a>';
+  }
+%>
+<nav class="bottom-nav" aria-label="القائمة">
+  <%- tab('documents', '/documents', 'الفسوحات', 'file', ncF.received) %>
+  <% if (isAdminF && engineEnabled) { %><%- tab('whatsapp', '/admin/whatsapp', 'واتساب', 'send', null, waAlert) %><% } %>
+  <% if (isAdminF) { %>
+    <details class="more">
+      <summary class="tab-link<%= ['reports', 'customers', 'messages', 'couriers', 'users', 'branches', 'integration', 'account'].indexOf(curF) >= 0 ? ' active' : '' %>"><span class="tab-icon"><%- icon('menu') %></span><span>المزيد</span></summary>
+      <div class="more-pop">
+        <a href="/admin/reports" class="menu-link"><%- icon('chart') %> التقارير</a>
+        <% if (!engineEnabled) { %><a href="/admin/messages" class="menu-link"><%- icon('message') %> رسائل العملاء</a><% } %>
+        <a href="/admin/couriers" class="menu-link"><%- icon('users') %> الموظفون والموصلون</a>
+        <a href="/admin/users" class="menu-link"><%- icon('lock') %> حسابات الدخول</a>
+        <a href="/admin/branches" class="menu-link"><%- icon('warehouse') %> أجهزة المحاسبين</a>
+        <% if (!engineEnabled) { %><a href="/admin/integration" class="menu-link"><%- icon('link') %> الربط مع البرنامج</a><% } %>
+        <a href="/account" class="menu-link"><%- icon('user') %> حسابي</a>
+      </div>
+    </details>
+  <% } else { %>
+    <%- tab('account', '/account', 'حسابي', 'user') %>
+  <% } %>
+</nav>
+<% } else { %>
+</main>
+<% } %>
+<script src="/static/js/app.js?v=<%= assetVersion %>" defer></script>
+</body>
+</html>

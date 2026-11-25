@@ -1,0 +1,52 @@
+<%- include('partials/head', { nav: 'documents' }) %>
+<% var branchQs = branch ? '&branch=' + encodeURIComponent(branch) : ''; %>
+
+<div class="page-head">
+  <h1>الفسوحات<%= (branch && !branchFilter.length) ? ' — فرع ' + branch : '' %></h1>
+</div>
+
+<form class="search search-bar" method="get" action="/documents" role="search">
+  <label for="q" class="sr-only">بحث</label>
+  <span class="search-field"><%- icon('search') %><input class="input" id="q" name="q" type="search" value="<%= search %>" placeholder="رقم الفسح أو اسم العميل أو رقمه"></span>
+  <% if (branch && branchFilter.length) { %><input type="hidden" name="branch" value="<%= branch %>"><% } %>
+  <button type="submit" class="btn btn-primary">بحث</button>
+  <% if (search) { %><a class="btn btn-ghost" href="/documents<%= branch && branchFilter.length ? '?branch=' + encodeURIComponent(branch) : '' %>">إلغاء البحث</a><% } %>
+</form>
+
+<% if (branchFilter.length > 1) { %>
+  <nav class="chips" aria-label="الفرع">
+    <span class="chips-label"><%- icon('warehouse') %> الفرع:</span>
+    <a class="chip<%= !branch ? ' active' : '' %>" href="/documents<%= search ? '?q=' + encodeURIComponent(search) : '' %>">كل الفروع</a>
+    <% branchFilter.forEach(function (b) { %>
+      <a class="chip<%= branch === b ? ' active' : '' %>" href="/documents?<%= search ? 'q=' + encodeURIComponent(search) + '&' : '' %>branch=<%= encodeURIComponent(b) %>">فرع <%= b %></a>
+    <% }) %>
+  </nav>
+<% } %>
+
+<% if (search) { %>
+  <p class="search-result">نتائج البحث عن "<strong><%= search %></strong>": <%= documents.length %><%= documents.length === 100 ? ' (أول 100)' : '' %></p>
+<% } %>
+
+<% if (search && (locals.handedMatches || []).length) { %>
+  <section class="card handed-matches">
+    <div class="card-title"><span class="card-icon tone-handed"><%- icon('truck') %></span><h2>انسلّمت للموصل (<%= handedMatches.length %>)</h2></div>
+    <ul class="item-list">
+      <% handedMatches.forEach(function (d) { %>
+        <li class="waiting-row">
+          <div class="waiting-main">
+            <strong><%= d.title %></strong><span class="muted"> · <%= d.customer_name || (d.customer_number ? 'عميل ' + d.customer_number : 'العميل غير معروف') %></span>
+            <div class="item-meta">انسلّم <%= formatWhen(d.handed_over_at) %><%= d.courier_name ? ' للموصل ' + d.courier_name : '' %><%= d.preparer_name ? ' · جهّزه ' + d.preparer_name : '' %></div>
+          </div>
+          <span class="status status-handed_to_courier">سُلّمت</span>
+        </li>
+      <% }) %>
+    </ul>
+  </section>
+<% } %>
+
+<div class="doc-list" id="doc-list" data-status="<%= status %>" data-branch="<%= branchFilter.length ? (branch || '') : '' %>" data-latest-id="<%= latestId %>">
+  <%- include('partials/doc-cards') %>
+</div>
+
+<script src="/static/js/documents.js?v=<%= assetVersion %>" defer></script>
+<%- include('partials/foot') %>

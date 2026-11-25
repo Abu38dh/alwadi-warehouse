@@ -1,0 +1,24 @@
+<%# تبويبات "واتساب والإرسال" + حالة برنامج الإرسال — يحتاج: tab, engine %>
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>واتساب والإرسال</h1>
+  </div>
+  <form method="post" action="/admin/whatsapp/restart" data-once data-confirm="إعادة تشغيل نظام الإرسال؟ الإرسال يوقف ثواني ويكمل.">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <input type="hidden" name="back" value="/admin/whatsapp<%= tab === 'overview' ? '' : '/' + tab %>">
+    <button type="submit" class="btn btn-ghost btn-small"><%- icon('refresh') %> إعادة تشغيل الإرسال</button>
+  </form>
+</div>
+
+<nav class="seg-tabs" aria-label="أقسام واتساب والإرسال">
+  <a class="seg-tab<%= tab === 'overview' ? ' active' : '' %>" href="/admin/whatsapp"<%- tab === 'overview' ? ' aria-current="page"' : '' %>><%- icon('send') %> الاتصال وسجل الإرسال</a>
+  <a class="seg-tab<%= tab === 'messages' ? ' active' : '' %>" href="/admin/whatsapp/messages"<%- tab === 'messages' ? ' aria-current="page"' : '' %>><%- icon('message') %> الرسائل</a>
+  <a class="seg-tab<%= tab === 'settings' ? ' active' : '' %>" href="/admin/whatsapp/settings"<%- tab === 'settings' ? ' aria-current="page"' : '' %>><%- icon('edit') %> الإعدادات</a>
+  <a class="seg-tab<%= tab === 'customers' ? ' active' : '' %>" href="/admin/customers"<%- tab === 'customers' ? ' aria-current="page"' : '' %>><%- icon('users') %> تقارير الفواتير</a>
+</nav>
+
+<% if (!engine.running) { %>
+  <div class="alert alert-danger" role="alert"><%- icon('alert') %><span>
+    برنامج الواتساب على جهاز الشركة ما يرد — تأكد إن الجهاز شغّال وعليه نت.
+  </span></div>
+<% } %>

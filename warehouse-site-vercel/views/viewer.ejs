@@ -1,0 +1,36 @@
+<%#
+  عارض الـ PDF داخل الموقع. نوعين:
+   - مستند من المستودع: doc, version, isLatest
+   - مستند من سجل الإرسال (واتساب والإرسال): viewer = { title, back, backLabel, src, download }
+%>
+<%
+  var v = locals.viewer || {
+    title: doc.title,
+    back: '/documents/' + doc.id,
+    backLabel: 'رجوع للمستند',
+    src: '/documents/' + doc.id + '/pdf-data?v=' + version,
+    download: '/documents/' + doc.id + '/pdf?v=' + version + '&download=1',
+    print: '/documents/' + doc.id + '/pdf-data?v=' + version,
+    version: isLatest ? null : version
+  };
+%>
+<%- include('partials/head', { nav: locals.nav || 'documents' }) %>
+
+<a class="back" href="<%= v.back %>"><%- icon('back') %> <%= v.backLabel || 'رجوع' %></a>
+
+<div class="viewer-bar">
+  <h1><%= v.title %><% if (v.version) { %> <span class="muted small">(النسخة <%= v.version %>)</span><% } %></h1>
+  <div class="viewer-tools">
+    <button type="button" class="icon-btn icon-btn-boxed" id="zoom-out" aria-label="تصغير"><%- icon('zoomOut') %></button>
+    <span class="viewer-zoom" id="zoom-label">100%</span>
+    <button type="button" class="icon-btn icon-btn-boxed" id="zoom-in" aria-label="تكبير"><%- icon('zoomIn') %></button>
+    <% if (v.print) { %><button type="button" class="btn btn-ghost btn-small" data-print-pdf="<%= v.print %>"><%- icon('printer') %> طباعة</button><% } %>
+    <% if (v.download) { %><a class="btn btn-ghost btn-small" href="<%= v.download %>"><%- icon('download') %> تنزيل</a><% } %>
+  </div>
+</div>
+
+<div class="viewer-status" id="viewer-status" role="status">جاري تحميل الملف...</div>
+<div class="viewer-pages" id="viewer-pages" data-src="<%= v.src %>"></div>
+
+<script type="module" src="/static/js/viewer.js?v=<%= assetVersion %>"></script>
+<%- include('partials/foot') %>

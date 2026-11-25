@@ -1,0 +1,23 @@
+<%# آخر رسائل حالة الطلب — يحتاج: recent, eventLabels, stateLabels, docTitle, now %>
+<section class="card">
+  <div class="card-title"><span class="card-icon"><%- icon('activity') %></span><h2>آخر الرسائل</h2></div>
+  <% if (!recent.length) { %>
+    <p class="card-sub card-sub-end">ما فيه رسائل للحين.</p>
+  <% } else { %>
+    <ul class="item-list recent-list">
+      <% recent.forEach(function (n) { %>
+        <li class="msg-row">
+          <div class="msg-row-main">
+            <a class="item-link" href="/documents/<%= n.document_id %>"><strong><%= docTitle({ id: n.document_id, doc_no: n.doc_no, doc_type: n.doc_type }) %></strong><% if (n.customer_name || n.customer_number) { %><span class="muted"> · <%= n.customer_name || ('عميل ' + n.customer_number) %></span><% } %></a>
+            <div class="item-text"><%= n.text %></div>
+            <div class="item-meta">
+              <%= eventLabels[n.event_type] || '' %> · <%= formatWhen(n.sent_at || n.created_at, now) %>
+              <% if (n.last_error) { %> · <%= n.last_error %><% } %>
+            </div>
+          </div>
+          <span class="msg-state msg-<%= n.state %>"><%= stateLabels[n.state] || n.state %></span>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>

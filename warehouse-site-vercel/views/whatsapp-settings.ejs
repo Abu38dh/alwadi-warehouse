@@ -1,0 +1,63 @@
+<%- include('partials/head', { nav: 'whatsapp', wide: true }) %>
+<%- include('partials/wa-tabs') %>
+<%
+  function whStatus(info) {
+    if (!info || !info.number) return '';
+    if (info.groupName) return '<span class="text-success">' + icon('check') + ' القروب: ' + escapeHtml(info.groupName) + '</span>';
+    return '<span class="text-danger">' + icon('alert') + ' ' + escapeHtml(info.problem || '') + '</span>';
+  }
+  function escapeHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+%>
+
+<% if (!settings) { %>
+  <section class="card"><p><%- icon('alert') %> نظام الإرسال ما يرد الحين، فالإعدادات ما تقدر تنعرض. حدّث الصفحة بعد ثواني.</p></section>
+<% } else { %>
+<form method="post" action="/admin/whatsapp/settings" class="form" data-once>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <input type="hidden" name="back" value="/admin/whatsapp/settings">
+
+  <div class="dash-grid">
+    <div class="dash-col">
+      <section class="card">
+        <div class="card-title"><span class="card-icon"><%- icon('file') %></span><h2>وش ينرسل</h2></div>
+        <% docTypes.forEach(function (t) { %>
+          <label class="check">
+            <input type="checkbox" name="send_<%= t.id %>" value="1"<%= settings.sendDocTypes && settings.sendDocTypes[t.id] ? ' checked' : '' %>>
+            <span>إرسال <%= t.label %><%= t.id === 'clearance' ? ' (لقروب المستودع)' : '' %></span>
+          </label>
+        <% }) %>
+      </section>
+
+      <section class="card">
+        <div class="card-title"><span class="card-icon tone-gold"><%- icon('warehouse') %></span><h2>قروبات المستودعات (الفسوحات)</h2></div>
+        <label for="wh-number">رقم قروب مستودع <%= warehouse && warehouse.mainBranch ? 'فرع ' + warehouse.mainBranch : 'الفرع الرئيسي' %></label>
+        <input class="input" id="wh-number" name="wh_number" value="<%= warehouse && warehouse.main ? warehouse.main.number : '' %>" inputmode="numeric" dir="ltr" placeholder="مثال: 95123698" maxlength="12">
+        <p class="field-status"><%- whStatus(warehouse && warehouse.main) %></p>
+        <% ((warehouse && warehouse.branchNumbers) || []).forEach(function (b, i) { %>
+          <label for="wh-b-<%= i %>">رقم قروب مستودع فرع <%= b.branch %></label>
+          <input class="input" id="wh-b-<%= i %>" name="wh_branch_<%= encodeURIComponent(b.branch) %>" value="<%= b.number || '' %>" inputmode="numeric" dir="ltr" placeholder="رقم القروب" maxlength="12">
+          <p class="field-status"><%- whStatus(b) %></p>
+        <% }) %>
+      </section>
+    </div>
+
+    <div class="dash-col">
+
+      <section class="card">
+        <div class="card-title"><span class="card-icon"><%- icon('clock') %></span><h2>الإرسال</h2></div>
+        <label for="delay">المهلة بين كل مستند والثاني (ثواني)</label>
+        <input class="input" id="delay" name="delay_seconds" type="number" min="1" max="120" step="1" value="<%= Math.round((settings.delayMs || 5000) / 1000) %>" dir="ltr">
+        <label for="test-phone">رقم التجربة (اختياري)</label>
+        <input class="input" id="test-phone" name="test_phone" value="<%= settings.testPhone || '' %>" inputmode="tel" dir="ltr" placeholder="مثال: 0500000000" maxlength="20">
+        <p class="card-sub<%= settings.testPhone ? ' text-warn' : '' %>"><%= settings.testPhone ? 'وضع التجربة شغال: كل المستندات تروح لهذا الرقم بس، وما يوصل شي للعملاء.' : 'اتركه فاضي.' %></p>
+      </section>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary"><%- icon('check') %> حفظ الإعدادات</button>
+  </div>
+</form>
+<% } %>
+
+<%- include('partials/foot') %>

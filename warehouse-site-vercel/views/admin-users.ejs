@@ -1,0 +1,112 @@
+<%- include('partials/head', { nav: 'users' }) %>
+
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>حسابات الدخول للموقع</h1>
+  </div>
+</div>
+
+<section class="card">
+  <details class="add-details">
+    <summary class="btn btn-primary"><%- icon('plus') %> إضافة حساب</summary>
+    <form method="post" action="/admin/users" class="form form-tight form-grid" autocomplete="off" data-once>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div>
+        <label for="new-full-name">الاسم</label>
+        <input class="input" id="new-full-name" name="full_name" type="text" maxlength="80" placeholder="مثال: جوال المستودع" required>
+      </div>
+      <div>
+        <label for="new-username">اسم المستخدم (إنجليزي)</label>
+        <input class="input" id="new-username" name="username" type="text" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off" required>
+      </div>
+      <div>
+        <label for="new-role">الدور</label>
+        <select class="input" id="new-role" name="role" required>
+          <option value="warehouse"><%= roleLabels.warehouse %></option>
+          <option value="admin"><%= roleLabels.admin %></option>
+        </select>
+      </div>
+      <div data-warehouse-only>
+        <label for="new-branch">الفرع</label>
+        <select class="input" id="new-branch" name="branch">
+          <option value="">كل الفروع</option>
+          <% branchNames.forEach(function (b) { %><option value="<%= b %>">فرع <%= b %></option><% }) %>
+        </select>
+      </div>
+      <div>
+        <label for="new-password">كلمة المرور (8 خانات أو أكثر)</label>
+        <input class="input" id="new-password" name="password" type="password" dir="ltr" autocomplete="new-password" minlength="8" required>
+      </div>
+      <div>
+        <label for="new-password2">تأكيد كلمة المرور</label>
+        <input class="input" id="new-password2" name="password2" type="password" dir="ltr" autocomplete="new-password" minlength="8" required>
+      </div>
+      <div class="form-actions form-grid-full">
+        <button type="submit" class="btn btn-primary">إنشاء الحساب</button>
+        <button type="button" class="btn btn-ghost" data-cancel>إلغاء</button>
+      </div>
+    </form>
+  </details>
+</section>
+
+<div class="people-grid">
+<% users.forEach(function (u) { %>
+  <section class="card person-card<%= u.active ? '' : ' person-off' %>">
+    <div class="person-head">
+      <span class="avatar avatar-lg<%= u.role === 'admin' ? ' avatar-admin' : '' %>"><%= String(u.full_name || u.username).trim().charAt(0) %></span>
+      <div class="person-info">
+        <div class="person-name"><%= u.full_name %><% if (u.id === user.id) { %> <span class="muted small">(أنت)</span><% } %></div>
+        <div class="muted small"><span dir="ltr"><%= u.username %></span> · <%= roleLabels[u.role] %> ·
+          <% if (u.role === 'admin') { %>كل الفروع<% } else if (u.branch) { %><strong>فرع <%= u.branch %></strong><% } else { %><span class="text-warn">كل الفروع (ما تحدد فرعه)</span><% } %>
+        </div>
+      </div>
+      <span class="badge <%= u.active ? 'badge-success' : 'badge-muted' %>"><%= u.active ? 'فعّال' : 'موقوف' %></span>
+    </div>
+    <details>
+      <summary class="summary-link"><%- icon('edit') %> تعديل</summary>
+      <form method="post" action="/admin/users/<%= u.id %>" class="form form-tight" data-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label for="full-name-<%= u.id %>">الاسم</label>
+        <input class="input" id="full-name-<%= u.id %>" name="full_name" type="text" value="<%= u.full_name %>" maxlength="80" required>
+        <label for="role-<%= u.id %>">الدور</label>
+        <select class="input" id="role-<%= u.id %>" name="role" required>
+          <option value="warehouse"<%= u.role === 'warehouse' ? ' selected' : '' %>><%= roleLabels.warehouse %></option>
+          <option value="admin"<%= u.role === 'admin' ? ' selected' : '' %>><%= roleLabels.admin %></option>
+        </select>
+        <div data-warehouse-only<%= u.role === 'admin' ? ' hidden' : '' %>>
+        <label for="branch-<%= u.id %>">الفرع</label>
+        <select class="input" id="branch-<%= u.id %>" name="branch">
+          <option value=""<%= !u.branch ? ' selected' : '' %>>كل الفروع</option>
+          <% branchNames.forEach(function (b) { %><option value="<%= b %>"<%= u.branch === b ? ' selected' : '' %>>فرع <%= b %></option><% }) %>
+        </select>
+        </div>
+        <label class="check">
+          <input type="checkbox" name="active" value="1"<%= u.active ? ' checked' : '' %>>
+          <span>فعّال (يقدر يدخل)</span>
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">حفظ</button>
+          <button type="button" class="btn btn-ghost" data-cancel>إلغاء</button>
+        </div>
+      </form>
+    </details>
+    <details>
+      <summary class="summary-link"><%- icon('lock') %> تغيير كلمة المرور</summary>
+      <form method="post" action="/admin/users/<%= u.id %>/password" class="form form-tight" autocomplete="off" data-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label for="password-<%= u.id %>">كلمة المرور الجديدة</label>
+        <input class="input" id="password-<%= u.id %>" name="password" type="password" dir="ltr" autocomplete="new-password" minlength="8" required>
+        <label for="password2-<%= u.id %>">تأكيد كلمة المرور</label>
+        <input class="input" id="password2-<%= u.id %>" name="password2" type="password" dir="ltr" autocomplete="new-password" minlength="8" required>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">تغيير</button>
+          <button type="button" class="btn btn-ghost" data-cancel>إلغاء</button>
+        </div>
+      </form>
+    </details>
+  </section>
+<% }) %>
+</div>
+
+
+<%- include('partials/foot') %>

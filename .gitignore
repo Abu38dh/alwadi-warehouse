@@ -1,0 +1,41 @@
+# مكتبات وملفات تتولد
+node_modules/
+dist/
+client-package/
+*.log
+*.tmp
+
+# بيانات وأسرار: ما تدخل المستودع أبداً
+backups/
+data/
+.env
+.env*
+.vercel/
+.baileys_auth/
+.wwebjs_auth/
+.wwebjs_cache/
+vercel-key.txt
+inovces/settings.json
+inovces/devices.json
+inovces/relay-jobs.json
+inovces/client-device.json
+inovces/outbox/
+inovces/warehouse-outbox/
+inovces/processed_history.json
+inovces/customer-activity*.json
+inovces/customers-list.json
+
+# فواتير عملاء حقيقية
+inovces/pdfssssssssss/
+
+# له مستودعه الخاص
+warehouse-site/
+
+# مجلد النقل للجهاز الحقيقي (فيه مفتاح الربط)
+transfer/
+
+# قائمة العملاء الحقيقية (أرقام العملاء والمناديب)
+inovces/customers-list.default.json
+
+inovces/samples/
+*.md

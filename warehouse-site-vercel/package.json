@@ -1,0 +1,29 @@
+{
+  "name": "warehouse-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "موقع المستودع: تتبع الفسوحات من وصولها للمستودع حتى تسليمها للموصل",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test tests/site.test.js tests/workflow.test.js tests/dashboard.test.js tests/names.test.js tests/notifications.test.js tests/branches.test.js tests/branch-scoping.test.js tests/reports.test.js tests/improvements.test.js tests/audit-fixes.test.js tests/customers-report.test.js tests/whatsapp-remote.test.js"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.18.0",
+    "@vercel/blob": "^2.9.0",
+    "bcrypt": "^6.0.0",
+    "ejs": "^7.0.2",
+    "express": "^5.3.0",
+    "express-session": "^1.19.0",
+    "helmet": "^8.3.0",
+    "multer": "^2.5.0",
+    "pdfjs-dist": "^6.5.438"
+  },
+  "devDependencies": {
+    "better-sqlite3": "^13.2.0"
+  }
+}

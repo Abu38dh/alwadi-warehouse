@@ -1,0 +1,34 @@
+{
+  "name": "invoice-sender",
+  "version": "1.0.0",
+  "description": "نظام إرسال الفواتير وكشوف الحساب تلقائياً إلى قروبات العملاء في واتساب",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test-extract": "node test-extract.js",
+    "list-groups": "node list-groups.js",
+    "test": "node --test test-group-matcher.js test-extract-statement.js test-print-capture.js test-wa-baileys.js test-relay.js test-notify.js test-layout.js test-customer-report.js test-warehouse.js test-warehouse-notify.js test-site-relay.js test-packaging.js test-report-attribution.js",
+    "install-printer": "node printer-setup.js install",
+    "uninstall-printer": "node printer-setup.js uninstall",
+    "printer-status": "node printer-setup.js status",
+    "setup-server": "node device-setup.js server",
+    "setup-client": "node device-setup.js client",
+    "make-client-package": "node make-client-package.js",
+    "build-exe": "node build-exe.js"
+  },
+  "keywords": [
+    "invoices",
+    "whatsapp",
+    "pdf",
+    "automation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@whiskeysockets/baileys": "7.0.0-rc14",
+    "chokidar": "^3.6.0",
+    "pdf-parse": "^1.1.1",
+    "qrcode-terminal": "^0.12.0"
+  }
+}

@@ -1,0 +1,6 @@
+<%# اختيار فرع الاسم: فرع محدد = يظهر لمستودع هذا الفرع بس، "كل الفروع" = يظهر للكل %>
+<% if (!compact) { %><label for="<%= id %>">الفرع</label><% } else { %><label for="<%= id %>" class="sr-only">الفرع</label><% } %>
+<select class="input<%= compact ? ' input-compact' : '' %>" id="<%= id %>" name="branch">
+  <% branchNames.forEach(function (b) { %><option value="<%= b %>"<%= current === b ? ' selected' : '' %>>فرع <%= b %></option><% }) %>
+  <option value=""<%= !current ? ' selected' : '' %>>كل الفروع</option>
+</select>

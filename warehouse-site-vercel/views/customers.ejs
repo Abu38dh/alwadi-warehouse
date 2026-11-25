@@ -1,0 +1,160 @@
+<%- include('partials/head', { nav: 'whatsapp', wide: true }) %>
+<%
+  function qs(extra) {
+    var o = { from: query.from || '', to: query.to || '', filter: filter === 'all' ? '' : filter, rep: query.rep || '', q: query.q || '' };
+    for (var k in extra) o[k] = extra[k];
+    var parts = [];
+    for (var key in o) if (o[key]) parts.push(key + '=' + encodeURIComponent(o[key]));
+    return parts.length ? '?' + parts.join('&') : '';
+  }
+%>
+
+<% var imp = importInfo || {}; var lastImp = imp.last; %>
+<%- include('partials/wa-tabs') %>
+<div class="wa-toolbar">
+  <form method="post" action="/admin/customers/import" enctype="multipart/form-data" data-once>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label class="btn btn-primary upload-btn">
+      <%- icon('upload') %> رفع قائمة العملاء
+      <input type="file" name="file" accept=".pdf,.csv,application/pdf,text/csv" required data-autosubmit>
+    </label>
+  </form>
+</div>
+
+<% if (imp.pending) { %>
+  <section class="card import-wait" data-refresh-soon>
+    <p class="import-status"><%- icon('clock') %>
+      <% if (imp.pending.mode === 'apply') { %>جاري تحديث القائمة…<% } else { %>جاري قراءة الملف: <strong><bdi><%= imp.pending.name %></bdi></strong><% } %>
+    </p>
+  </section>
+<% } else if (proposal) { var d = proposal.diff; %>
+  <section class="card import-review">
+    <div class="card-title"><span class="card-icon"><%- icon('users') %></span><h2>التعديلات في القائمة الجديدة</h2></div>
+    <p class="import-file"><bdi><%= proposal.name %></bdi> · <%= d.total %> عميل (الحالية <%= d.current %>)</p>
+    <div class="diff-tiles">
+      <div class="diff-tile diff-added"><b><%= d.added.length %></b>عملاء جدد</div>
+      <div class="diff-tile diff-removed"><b><%= d.removed.length %></b>انشالوا</div>
+      <div class="diff-tile diff-changed"><b><%= d.changed.length %></b>تغيّر مندوبهم</div>
+      <div class="diff-tile"><b><%= d.same %></b>بدون تغيير</div>
+    </div>
+    <% if (d.added.length) { %>
+      <details class="diff-list"<%= d.added.length <= 30 ? ' open' : '' %>>
+        <summary class="summary-link">العملاء الجدد (<%= d.added.length %>)</summary>
+        <ul><% d.added.slice(0, 300).forEach(function (c) { %><li><strong dir="ltr"><%= c.number %></strong><% if (c.repName) { %> · <%= c.repName %><% } %></li><% }) %></ul>
+      </details>
+    <% } %>
+    <% if (d.removed.length) { %>
+      <details class="diff-list"<%= d.removed.length <= 30 ? ' open' : '' %>>
+        <summary class="summary-link">اللي انشالوا (<%= d.removed.length %>)</summary>
+        <ul><% d.removed.slice(0, 300).forEach(function (c) { %><li><strong dir="ltr"><%= c.number %></strong><% if (c.repName) { %> · <%= c.repName %><% } %></li><% }) %></ul>
+      </details>
+    <% } %>
+    <% if (d.changed.length) { %>
+      <details class="diff-list"<%= d.changed.length <= 30 ? ' open' : '' %>>
+        <summary class="summary-link">تغيّر مندوبهم (<%= d.changed.length %>)</summary>
+        <ul><% d.changed.slice(0, 300).forEach(function (c) { %><li><strong dir="ltr"><%= c.number %></strong> · <%= c.from || '—' %> ← <%= c.to || '—' %></li><% }) %></ul>
+      </details>
+    <% } %>
+    <% if (!d.added.length && !d.removed.length && !d.changed.length) { %>
+      <p class="import-status">نفس القائمة الحالية، ما فيه أي تغيير</p>
+    <% } %>
+    <div class="form-actions">
+      <form method="post" action="/admin/customers/import/approve" data-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" class="btn btn-primary"><%- icon('check') %> موافق، حدّث القائمة</button>
+      </form>
+      <form method="post" action="/admin/customers/import/cancel" data-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" class="btn btn-ghost">إلغاء</button>
+      </form>
+    </div>
+  </section>
+<% } else if (lastImp && !lastImp.ok) { %>
+  <div class="alert alert-danger" role="alert"><%- icon('alert') %><span><bdi><%= lastImp.name %></bdi>: <%= lastImp.message %></span></div>
+<% } else if (lastImp && lastImp.ok && now - Date.parse(lastImp.at) < 30 * 60 * 1000) { %>
+  <div class="alert alert-success" role="status"><%- icon('check') %><span>تم تحديث قائمة العملاء: <%= lastImp.count %> عميل</span></div>
+<% } %>
+
+<% if (!rep) { %>
+  <section class="card"><p><%- icon('alert') %> بيانات التقرير ما وصلت من برنامج الواتساب للحين</p></section>
+<% } else { %>
+
+<section class="card report-filters">
+  <form class="report-range" method="get" action="/admin/customers">
+    <label>من <input class="input" type="date" name="from" value="<%= rep.from %>" dir="ltr"></label>
+    <label>إلى <input class="input" type="date" name="to" value="<%= rep.to %>" dir="ltr"></label>
+    <% if (repOptions.length > 1) { %>
+      <label>المندوب
+        <select class="input" name="rep">
+          <option value="">الكل</option>
+          <% repOptions.forEach(function (o) { %><option value="<%= o.key %>"<%= query.rep === o.key ? ' selected' : '' %>><%= o.name %></option><% }) %>
+        </select>
+      </label>
+    <% } %>
+    <label>رقم العميل <input class="input" name="q" value="<%= query.q || '' %>" inputmode="numeric" dir="ltr" maxlength="12"></label>
+    <% if (filter !== 'all') { %><input type="hidden" name="filter" value="<%= filter %>"><% } %>
+    <button type="submit" class="btn btn-ghost">تطبيق</button>
+    <a class="btn btn-primary" href="/admin/customers/export.xlsx<%= qs({}) %>"><%- icon('download') %> تحميل Excel</a>
+  </form>
+</section>
+
+<%# الأرقام هي نفسها أزرار الفلتر %>
+<nav class="filter-tiles" aria-label="تصفية العملاء">
+  <% Object.keys(filters).forEach(function (k) { %>
+    <a class="filter-tile filter-<%= k %><%= filter === k ? ' active' : '' %>" href="/admin/customers<%= qs({ filter: k === 'all' ? '' : k }) %>"<%= filter === k ? ' aria-current="true"' : '' %>>
+      <span class="filter-tile-count"><%= filterCounts[k] %></span>
+      <span class="filter-tile-label"><%= filters[k].label %></span>
+    </a>
+  <% }) %>
+</nav>
+
+<section class="card">
+  <div class="card-title"><span class="card-icon"><%- icon('users') %></span><h2>العملاء (<%= rows.length %>)</h2></div>
+  <% if (!rows.length) { %><p class="card-sub card-sub-end">ما فيه عملاء بهذا الفلتر</p><% } else { %>
+  <div class="branch-scroll cust-table">
+    <table class="branch-table">
+      <thead><tr><th>رقم العميل</th><th>المندوب</th><th class="num">فواتير</th><th class="num">مرتجعات</th><th class="num">كشوفات</th><th class="num">فسوحات</th><th class="num">ما انرسلت</th><th>آخر مستند</th></tr></thead>
+      <tbody>
+        <% rows.slice(0, 500).forEach(function (r) { %>
+          <tr>
+            <td class="td-start"><a href="/admin/customers/<%= encodeURIComponent(r.number) %>"><strong dir="ltr"><%= r.number %></strong></a><% if (r.hasGroup === false) { %> <span class="tag tag-danger">ما له قروب</span><% } %></td>
+            <td><%= r.repName || '—' %></td>
+            <td class="num <%= r.invoices ? 'text-success' : 'muted' %>"><%= r.invoices %></td>
+            <td class="num <%= r.returns ? '' : 'muted' %>"><%= r.returns %></td>
+            <td class="num <%= r.statements ? 'text-success' : 'muted' %>"><%= r.statements %></td>
+            <td class="num <%= r.clearances ? '' : 'muted' %>"><%= r.clearances %></td>
+            <td class="num <%= r.problems ? 'text-danger' : 'muted' %>"><%= r.problems || '—' %></td>
+            <td><%= r.lastAt ? formatRiyadh(r.lastAt) : '—' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <%# الجوال: كل عميل سطرين بدل جدول عريض %>
+  <ul class="cust-cards">
+    <% rows.slice(0, 500).forEach(function (r) { %>
+      <li>
+        <a class="cust-card" href="/admin/customers/<%= encodeURIComponent(r.number) %>">
+          <span class="cust-card-top">
+            <strong dir="ltr"><%= r.number %></strong>
+            <% if (r.hasGroup === false) { %><span class="tag tag-danger">ما له قروب</span><% } %>
+            <span class="cust-card-rep"><%= r.repName || '' %></span>
+          </span>
+          <span class="cust-sum">
+            <span class="cust-sum-item<%= r.invoices ? ' has' : '' %>"><b><%= r.invoices %></b>فواتير</span>
+            <span class="cust-sum-item<%= r.returns ? ' has' : '' %>"><b><%= r.returns %></b>مرتجعات</span>
+            <span class="cust-sum-item<%= r.statements ? ' has' : '' %>"><b><%= r.statements %></b>كشوفات</span>
+            <span class="cust-sum-item<%= r.clearances ? ' has' : '' %>"><b><%= r.clearances %></b>فسوحات</span>
+          </span>
+          <% if (r.problems) { %><span class="cust-card-meta text-danger"><%- icon('alert') %> <%= r.problems %> ما انرسلت</span><% } %>
+          <% if (r.lastAt) { %><span class="cust-card-meta">آخر مستند <%= formatRiyadh(r.lastAt) %></span><% } %>
+        </a>
+      </li>
+    <% }) %>
+  </ul>
+  <% if (rows.length > 500) { %><p class="card-sub card-sub-end">يظهر أول 500 — حمّل ملف Excel تشوف الكل</p><% } %>
+  <% } %>
+</section>
+<% } %>
+
+<%- include('partials/foot') %>

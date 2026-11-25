@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f8f6f1">
+  <meta name="format-detection" content="telephone=no">
+  <title><%= title %> — مستودع الوادي</title>
+  <link rel="icon" href="/static/img/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/css/app.css?v=<%= assetVersion %>">
+</head>
+<% if (!user) { %>
+<body class="guest">
+<main class="guest-page">
+<% } else { %>
+<%
+  var isAdmin = user.role === 'admin';
+  var nc = locals.navCounts || {};
+  var current = locals.nav || '';
+  var initial = String(user.full_name || user.username || '؟').trim().charAt(0);
+  var roleText = roleLabel + (!isAdmin && user.branch ? ' · فرع ' + user.branch : '');
+  var mainItems = [];
+  mainItems.push({ key: 'documents', href: '/documents', label: 'الفسوحات', icon: 'file', badge: nc.received });
+  if (isAdmin) mainItems.push({ key: 'reports', href: '/admin/reports', label: 'التقارير', icon: 'chart' });
+  // النظام المدمج: واتساب والإرسال داخل الموقع
+  if (isAdmin && engineEnabled) mainItems.push({ key: 'whatsapp', href: '/admin/whatsapp', label: 'واتساب والإرسال', icon: 'send', alert: waAlert });
+  var adminItems = isAdmin ? [
+    { key: 'messages', href: '/admin/messages', label: 'رسائل العملاء', icon: 'message' },
+    { key: 'couriers', href: '/admin/couriers', label: 'الموظفون والموصلون', icon: 'users' },
+    { key: 'users', href: '/admin/users', label: 'حسابات الدخول', icon: 'lock' },
+    { key: 'branches', href: '/admin/branches', label: 'أجهزة المحاسبين', icon: 'warehouse' },
+    { key: 'integration', href: '/admin/integration', label: 'الربط مع البرنامج', icon: 'link' }
+  ].filter(function (item) { return !(engineEnabled && (item.key === 'integration' || item.key === 'messages')); }) : [];
+  function navLink(item, cls) {
+    var active = item.key === current;
+    return '<a href="' + item.href + '" class="' + cls + (active ? ' active' : '') + '"' + (active ? ' aria-current="page"' : '') + '>'
+      + icon(item.icon)
+      + '<span class="nav-label">' + item.label + '</span>'
+      + (item.badge ? '<span class="nav-badge">' + item.badge + '</span>' : '')
+      + (item.alert ? '<span class="nav-dot" title="واتساب الشركة غير متصل" aria-label="واتساب الشركة غير متصل"></span>' : '')
+      + '</a>';
+  }
+%>
+<body class="app">
+<div class="shell">
+  <aside class="sidebar" aria-label="القائمة الرئيسية">
+    <a class="sidebar-brand" href="/">
+      <span class="logo-tile"><img src="/static/img/logo.png" alt="الوادي لقطع غيار السيارات" width="180" height="37"></span>
+      <span class="sidebar-title"><%- icon('warehouse') %> نظام المستودع</span>
+    </a>
+    <nav class="side-nav">
+      <div class="side-group">التشغيل</div>
+      <% mainItems.forEach(function (item) { %><%- navLink(item, 'side-link') %><% }) %>
+      <% if (adminItems.length) { %>
+        <div class="side-group">الإدارة</div>
+        <% adminItems.forEach(function (item) { %><%- navLink(item, 'side-link') %><% }) %>
+      <% } %>
+    </nav>
+    <div class="side-user">
+      <a class="side-user-info<%= current === 'account' ? ' active' : '' %>" href="/account" title="حسابي">
+        <span class="avatar"><%= initial %></span>
+        <span class="side-user-text"><span class="side-user-name"><%= user.full_name %></span><span class="side-user-role"><%= roleText %></span></span>
+      </a>
+      <form method="post" action="/logout" class="logout-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" class="icon-btn" title="خروج" aria-label="خروج"><%- icon('logout') %></button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="mobile-top">
+      <a class="mobile-brand" href="/"><img src="/static/img/logo.png" alt="الوادي لقطع غيار السيارات" width="150" height="31"></a>
+      <details class="user-menu">
+        <summary aria-label="حسابي"><span class="avatar"><%= initial %></span></summary>
+        <div class="menu-pop">
+          <div class="menu-head"><strong><%= user.full_name %></strong><span><%= roleText %></span></div>
+          <a href="/account" class="menu-link"><%- icon('user') %> حسابي</a>
+          <form method="post" action="/logout" class="logout-form">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button type="submit" class="menu-link menu-danger"><%- icon('logout') %> خروج</button>
+          </form>
+        </div>
+      </details>
+    </header>
+    <main class="page<%= locals.wide ? ' page-wide' : '' %>">
+<% } %>
+<% if (flash) { %>
+  <div class="alert alert-<%= flash.type %> flash" role="status"><%- icon(flash.type === 'success' ? 'checkCircle' : (flash.type === 'danger' ? 'alert' : 'info')) %><span><%= flash.text %></span></div>
+<% } %>

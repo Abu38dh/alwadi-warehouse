@@ -1,0 +1,59 @@
+<%- include('partials/head', { nav: 'integration' }) %>
+
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>الربط مع البرنامج</h1>
+  </div>
+</div>
+
+<% if (newKey) { %>
+  <section class="card card-highlight">
+    <div class="card-title"><span class="card-icon tone-gold"><%- icon('lock') %></span><h2>مفتاح الربط الجديد</h2></div>
+    <p>انسخه الحين — <strong>ما راح يظهر مرة ثانية</strong>. لو ضاع، أنشئ مفتاح جديد.</p>
+    <div class="copy-row">
+      <input class="input mono" id="new-key" type="text" value="<%= newKey %>" dir="ltr" readonly>
+      <button type="button" class="btn btn-primary" data-copy="#new-key"><%- icon('copy') %> نسخ</button>
+    </div>
+  </section>
+<% } %>
+
+<section class="card">
+  <div class="card-title"><span class="card-icon <%= info.exists ? 'tone-success' : 'tone-danger' %>"><%- icon('link') %></span><h2>الحالة</h2></div>
+  <dl class="facts">
+    <div>
+      <dt>مفتاح الربط</dt>
+      <dd><% if (info.exists) { %><span class="badge badge-success">موجود</span> أُنشئ <%= formatRiyadh(info.createdAt) %><% } else { %><span class="badge badge-danger">لم يُنشأ بعد</span><% } %></dd>
+    </div>
+    <div>
+      <dt>آخر اتصال من البرنامج</dt>
+      <dd><% if (info.lastSeenAt) { %><%= formatRiyadh(info.lastSeenAt) %> <span class="muted">(<%= timeAgoAr(info.lastSeenAt) %>)</span><% } else { %>لم يتصل البرنامج بعد<% } %></dd>
+    </div>
+  </dl>
+</section>
+
+<section class="card">
+  <div class="card-title"><span class="card-icon"><%- icon('info') %></span><h2>طريقة الربط</h2></div>
+  <ol class="steps">
+    <li><span class="step-num">1</span><span>اضغط "إنشاء مفتاح جديد" تحت، وانسخ المفتاح.</span></li>
+    <li><span class="step-num">2</span><span>في برنامج إرسال المستندات: الإعدادات ← <strong>المستودع (الفسوحات)</strong>.</span></li>
+    <li>
+      <span class="step-num">3</span>
+      <span class="steps-body">الصق رابط الموقع:
+        <span class="copy-row">
+          <input class="input mono" id="site-url" type="text" value="<%= siteUrl %>" dir="ltr" readonly>
+          <button type="button" class="btn btn-ghost" data-copy="#site-url"><%- icon('copy') %> نسخ</button>
+        </span>
+      </span>
+    </li>
+    <li><span class="step-num">4</span><span>الصق المفتاح في خانة "مفتاح الربط"، واختر قروب المستودع، ثم "حفظ".</span></li>
+  </ol>
+
+  <form method="post" action="/admin/integration/rotate"
+        <% if (info.exists) { %>data-confirm="إنشاء مفتاح جديد يوقف المفتاح الحالي فوراً، والبرنامج ما راح يرفع أي فسح للموقع لين تحط له المفتاح الجديد. متأكد؟"<% } %>>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <button type="submit" class="btn <%= info.exists ? 'btn-ghost' : 'btn-primary' %> btn-block"><%- icon('refresh') %> إنشاء مفتاح جديد</button>
+  </form>
+  <% if (info.exists) { %><p class="card-sub card-sub-end">المفتاح الحالي يتوقف فوراً عند إنشاء مفتاح جديد.</p><% } %>
+</section>
+
+<%- include('partials/foot') %>

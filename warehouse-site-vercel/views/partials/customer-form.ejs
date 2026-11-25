@@ -1,0 +1,17 @@
+<%# تصحيح العميل (الإدارة) — يحتاج: doc، compact %>
+<form method="post" action="/documents/<%= doc.id %>/customer" class="form form-tight customer-form<%= compact ? ' customer-form-inline' : '' %>" data-once data-confirm="رسائل حالة الطلب الجاية بتروح لقروب هذا العميل. متأكد من الرقم؟">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div>
+    <label for="cust-num-<%= compact ? 'a' : 'b' %>">رقم العميل</label>
+    <input class="input" id="cust-num-<%= compact ? 'a' : 'b' %>" name="customer_number" value="<%= doc.customer_number || '' %>" inputmode="numeric" dir="ltr" maxlength="12" required>
+  </div>
+  <div>
+    <label for="cust-name-<%= compact ? 'a' : 'b' %>">اسم العميل (اختياري)</label>
+    <input class="input" id="cust-name-<%= compact ? 'a' : 'b' %>" name="customer_name" value="<%= doc.customer_name || '' %>" maxlength="80">
+  </div>
+  <% if (compact) { %><button type="submit" class="btn btn-primary">حفظ العميل</button><% } else { %>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">حفظ العميل</button>
+    <button type="button" class="btn btn-ghost" data-cancel>إلغاء</button>
+  </div><% } %>
+</form>

@@ -1,0 +1,102 @@
+<%- include('partials/head', { nav: 'couriers', wide: true }) %>
+
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>الموظفون والموصلون</h1>
+  </div>
+</div>
+
+<div class="dash-grid">
+  <div class="dash-col">
+    <section class="card">
+      <div class="card-title"><span class="card-icon tone-preparing"><%- icon('package') %></span><h2>الموظفون (اللي يجهّزون الطلبات)</h2></div>
+      <form method="post" action="/admin/workers" class="inline-add" data-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label for="new-worker" class="sr-only">اسم الموظف</label>
+        <input class="input" id="new-worker" name="name" type="text" maxlength="60" placeholder="اسم موظف جديد" required>
+        <%- include('partials/branch-select', { id: 'new-worker-branch', current: branchNames.length === 1 ? branchNames[0] : null, compact: true }) %>
+        <button type="submit" class="btn btn-primary"><%- icon('plus') %> إضافة</button>
+      </form>
+      <% if (!workers.length) { %>
+        <p class="card-sub">ما فيه أسماء بعد.</p>
+      <% } %>
+      <% workers.forEach(function (w) { %>
+        <div class="person<%= w.active ? '' : ' person-off' %>">
+          <div class="person-head">
+            <span class="avatar"><%= String(w.name).trim().charAt(0) %></span>
+            <div class="person-info"><div class="person-name"><%= w.name %></div><div class="muted small"><%= w.branch ? ('فرع ' + w.branch) : 'كل الفروع' %></div></div>
+            <span class="badge <%= w.active ? 'badge-success' : 'badge-muted' %>"><%= w.active ? 'فعّال' : 'موقوف' %></span>
+          </div>
+          <details>
+            <summary class="summary-link"><%- icon('edit') %> تعديل</summary>
+            <form method="post" action="/admin/workers/<%= w.id %>" class="form form-tight" data-once>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <label for="worker-<%= w.id %>">الاسم</label>
+              <input class="input" id="worker-<%= w.id %>" name="name" type="text" value="<%= w.name %>" maxlength="60" required>
+              <%- include('partials/branch-select', { id: 'worker-branch-' + w.id, current: w.branch, compact: false }) %>
+              <label class="check">
+                <input type="checkbox" name="active" value="1"<%= w.active ? ' checked' : '' %>>
+                <span>فعّال</span>
+              </label>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">حفظ</button>
+                <button type="button" class="btn btn-ghost" data-cancel>إلغاء</button>
+              </div>
+            </form>
+          </details>
+        </div>
+      <% }) %>
+    </section>
+  </div>
+
+  <div class="dash-col">
+    <section class="card">
+      <div class="card-title"><span class="card-icon tone-handed"><%- icon('truck') %></span><h2>الموصلون</h2></div>
+      <form method="post" action="/admin/couriers" class="inline-add" data-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label for="new-name" class="sr-only">اسم الموصل</label>
+        <input class="input" id="new-name" name="name" type="text" maxlength="80" placeholder="اسم موصل جديد" required>
+        <%- include('partials/branch-select', { id: 'new-courier-branch', current: branchNames.length === 1 ? branchNames[0] : null, compact: true }) %>
+        <button type="submit" class="btn btn-primary"><%- icon('plus') %> إضافة</button>
+      </form>
+      <% if (!couriers.length) { %>
+        <p class="card-sub">ما فيه أسماء بعد.</p>
+      <% } %>
+      <% couriers.forEach(function (c) { %>
+        <div class="person<%= c.active ? '' : ' person-off' %>">
+          <div class="person-head">
+            <span class="avatar"><%= String(c.name).trim().charAt(0) %></span>
+            <div class="person-info">
+              <div class="person-name"><%= c.name %></div>
+              <div class="muted small"><%= c.branch ? ('فرع ' + c.branch) : 'كل الفروع' %></div>
+              <% if (c.phone) { %><div class="muted small" dir="ltr"><%= c.phone %></div><% } %>
+            </div>
+            <span class="badge <%= c.active ? 'badge-success' : 'badge-muted' %>"><%= c.active ? 'فعّال' : 'موقوف' %></span>
+          </div>
+          <details>
+            <summary class="summary-link"><%- icon('edit') %> تعديل</summary>
+            <form method="post" action="/admin/couriers/<%= c.id %>" class="form form-tight" data-once>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <label for="name-<%= c.id %>">الاسم</label>
+              <input class="input" id="name-<%= c.id %>" name="name" type="text" value="<%= c.name %>" maxlength="80" required>
+              <label for="phone-<%= c.id %>">الجوال (اختياري)</label>
+              <input class="input" id="phone-<%= c.id %>" name="phone" type="tel" dir="ltr" value="<%= c.phone || '' %>" maxlength="20" inputmode="tel">
+              <%- include('partials/branch-select', { id: 'courier-branch-' + c.id, current: c.branch, compact: false }) %>
+              <label class="check">
+                <input type="checkbox" name="active" value="1"<%= c.active ? ' checked' : '' %>>
+                <span>فعّال</span>
+              </label>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">حفظ</button>
+                <button type="button" class="btn btn-ghost" data-cancel>إلغاء</button>
+              </div>
+            </form>
+          </details>
+        </div>
+      <% }) %>
+    </section>
+  </div>
+</div>
+
+
+<%- include('partials/foot') %>

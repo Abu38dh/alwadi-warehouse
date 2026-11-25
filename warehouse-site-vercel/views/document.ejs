@@ -1,0 +1,304 @@
+<%- include('partials/head', { nav: 'documents', wide: true }) %>
+<% var openShortages = shortages.filter(function (s) { return !s.closed_event_id; }); %>
+<% var closedShortages = shortages.filter(function (s) { return s.closed_event_id; }); %>
+
+<a class="back" href="/documents?status=<%= doc.status %>"><%- icon('back') %> رجوع للفسوحات</a>
+
+<div class="page-head doc-head">
+  <div class="page-head-text">
+    <div class="doc-head-title">
+      <h1><%= doc.title %></h1>
+      <span class="status status-lg status-<%= doc.status %>"><%= doc.statusLabel %></span>
+    </div>
+    <p class="page-sub">
+      <% if (doc.customer_name) { %><strong><%= doc.customer_name %></strong><% } %>
+      <% if (doc.customer_number) { %><%= doc.customer_name ? ' · ' : '' %>عميل <%= doc.customer_number %><% } %>
+      <% if (!doc.customer_name && !doc.customer_number) { %><span class="text-warn">العميل غير معروف</span><% } %>
+      <% if (doc.branch && user.role === 'admin') { %> · فرع <%= doc.branch %><% } %>
+    </p>
+  </div>
+  <% if (files.length) { %>
+    <div class="head-actions">
+      <button type="button" class="btn btn-ghost" data-print-pdf="/documents/<%= doc.id %>/pdf-data" data-view="/documents/<%= doc.id %>/view"><%- icon('printer') %> طباعة الفسح</button>
+      <a class="btn btn-ghost" href="/documents/<%= doc.id %>/view"><%- icon('eye') %> فتح الفسح</a>
+    </div>
+  <% } %>
+</div>
+
+<% if (doc.problems.length) { %>
+  <div class="alert alert-warn alert-block">
+    <div class="alert-row"><%- icon('alert') %>
+      <span><strong>بيانات ناقصة:</strong> <%= doc.problemLabels.join('، ') %></span>
+    </div>
+    <% if (user.role === 'admin') { %><%- include('partials/customer-form', { compact: true }) %><% } %>
+  </div>
+<% } %>
+<% if (doc.modified_flag && files.length > 1) { %>
+  <div class="alert alert-info alert-block">
+    <div class="alert-row"><%- icon('refresh') %><span>المحاسب عدّل هذا الفسح وطبعه من جديد.</span></div>
+    <a class="btn btn-primary btn-small" href="/documents/<%= doc.id %>/compare"><%- icon('eye') %> وش تغيّر؟</a>
+  </div>
+<% } else if (doc.modified_flag) { %>
+  <div class="alert alert-info"><%- icon('refresh') %><span>وصلت نسخة معدّلة من هذا الفسح.</span></div>
+<% } %>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <%# ---------- مراحل الفسح: وين وصل ومين سوّى كل خطوة ---------- %>
+    <% var stepOrder = ['received', 'preparing', 'prepared', 'handed_to_courier']; %>
+    <% var currentIndex = stepOrder.indexOf(doc.status); %>
+    <% var steps = [
+      { label: 'وصل للمستودع', at: doc.received_at, who: '' },
+      { label: 'بدأ التجهيز', at: doc.prep_started_at, who: doc.preparer_name ? ('يجهّزه: ' + doc.preparer_name) : '' },
+      { label: 'تم التجهيز', at: doc.prepared_at, who: '' },
+      { label: 'سُلّم للموصل', at: doc.handed_over_at, who: doc.courier_name ? ('الموصل: ' + doc.courier_name) : '' }
+    ]; %>
+    <section class="card step-card">
+      <div class="card-title"><span class="card-icon"><%- icon('activity') %></span><h2>وين وصل الفسح؟</h2></div>
+      <ol class="stepper">
+        <% steps.forEach(function (s, i) { %>
+          <% var state = i <= currentIndex ? 'done' : (i === currentIndex + 1 ? 'next' : 'todo'); %>
+          <li class="step step-<%= state %> st-<%= stepOrder[i] %>">
+            <span class="step-dot"><%- state === 'done' ? icon('check') : (i + 1) %></span>
+            <span class="step-body">
+              <span class="step-label"><%= s.label %></span>
+              <% if (state === 'done') { %>
+                <span class="step-time"><%= formatWhen(s.at) %></span>
+                <% if (s.who) { %><span class="step-who"><%= s.who %></span><% } %>
+              <% } else if (state === 'next') { %>
+                <span class="step-time">الخطوة التالية</span>
+              <% } %>
+            </span>
+          </li>
+        <% }) %>
+      </ol>
+    </section>
+
+    <%# ---------- الخطوة التالية ---------- %>
+    <% if (doc.status === 'received') { %>
+      <%# بدء التجهيز: اختيار الموظف اللي يجهّز الطلب (أو كتابة اسمه) %>
+      <form method="post" action="/documents/<%= doc.id %>/advance" class="card action-card start-prep" data-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="expected_status" value="received">
+        <div class="card-title"><span class="card-icon tone-received"><%- icon('user') %></span><h2>مين يجهّز هذا الطلب؟</h2></div>
+        <% if (workers.length) { %>
+          <div class="choices choices-grid">
+            <% workers.forEach(function (w) { %>
+              <label class="choice">
+                <input type="radio" name="worker_name" value="<%= w.name %>"<%= workers.length === 1 ? ' checked' : '' %>>
+                <span class="choice-body"><span class="choice-title"><%= w.name %></span></span>
+              </label>
+            <% }) %>
+          </div>
+          <label for="worker_name_new" class="field-label">أو اكتب اسم موظف جديد:</label>
+        <% } else { %>
+          <label for="worker_name_new" class="field-label">اسم الموظف:</label>
+        <% } %>
+        <input class="input" id="worker_name_new" name="worker_name_new" type="text" maxlength="60" autocomplete="off" placeholder="مثال: محمد" data-pairs-with="worker_name">
+        <button type="submit" class="btn btn-primary btn-block btn-big"><%- icon('package') %> بدء التجهيز</button>
+      </form>
+    <% } else if (nextStep) { %>
+      <form method="post" action="/documents/<%= doc.id %>/advance" class="card action-card next-step" data-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="expected_status" value="<%= doc.status %>">
+        <button type="submit" class="btn btn-success btn-block btn-big"><%- icon('clipboardCheck') %> <%= nextStep.button %></button>
+      </form>
+    <% } else if (doc.status === 'prepared') { %>
+      <%# التسليم للموصل: من هنا مباشرة (اختيار الموصل أو كتابة اسمه) %>
+      <form method="post" action="/handover" class="card action-card handover-form" enctype="multipart/form-data" data-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="doc_ids" value="<%= doc.id %>">
+        <div class="card-title"><span class="card-icon tone-handed"><%- icon('truck') %></span><h2>مين الموصل اللي استلم الطلب؟</h2></div>
+        <% if (couriers.length) { %>
+          <div class="choices choices-grid">
+            <% couriers.forEach(function (c) { %>
+              <label class="choice">
+                <input type="radio" name="courier_id" value="<%= c.id %>">
+                <span class="choice-body"><span class="choice-title"><%= c.name %></span></span>
+              </label>
+            <% }) %>
+          </div>
+          <label for="courier_name" class="field-label">أو اكتب اسم موصل جديد:</label>
+        <% } else { %>
+          <label for="courier_name" class="field-label">اسم الموصل:</label>
+        <% } %>
+        <input class="input" id="courier_name" name="courier_name" type="text" maxlength="80" autocomplete="off" placeholder="مثال: سالم" data-pairs-with="courier_id">
+        <%# سند التسليم (إجباري): يصوّره من الجوال أو يختار ملف — ويروح مع رسالة الشحن لقروب العميل %>
+        <label for="receipt" class="field-label">سند التسليم (صورة أو PDF):</label>
+        <label class="receipt-pick">
+          <input id="receipt" name="receipt" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple required data-receipt>
+          <span class="receipt-pick-btn"><%- icon('upload') %> <span data-receipt-label>صوّر السند أو اختر ملف</span></span>
+        </label>
+        <div class="receipt-preview" data-receipt-preview hidden></div>
+        <% if (doc.has_open_shortage) { %>
+          <div class="alert alert-warn form-alert"><%- icon('alert') %><span>انتبه: فيه نقص مفتوح على هذا الطلب.</span></div>
+        <% } %>
+        <button type="submit" class="btn btn-primary btn-block btn-big"><%- icon('truck') %> تسليم للموصل</button>
+      </form>
+    <% } %>
+
+    <%# ---------- النواقص المفتوحة ---------- %>
+    <% if (openShortages.length) { %>
+      <section class="card card-danger">
+        <div class="card-title"><span class="card-icon tone-danger"><%- icon('alert') %></span><h2>نواقص مفتوحة (<%= openShortages.length %>)</h2></div>
+        <% openShortages.forEach(function (s) { %>
+          <div class="shortage">
+            <div class="shortage-text"><%= s.text %></div>
+            <div class="item-meta"><%= formatWhen(s.created_at) %><% if (s.user_name) { %> · <%= s.user_name %><% } %> · مفتوح منذ <%= durationSince(s.created_at) %></div>
+            <details class="inline-details">
+              <summary class="btn btn-ghost btn-small"><%- icon('check') %> إقفال النقص</summary>
+              <form method="post" action="/documents/<%= doc.id %>/shortages/<%= s.id %>/close" class="form" data-once>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <label for="resolution-<%= s.id %>">كيف انحل؟</label>
+                <textarea class="input" id="resolution-<%= s.id %>" name="resolution" rows="2" maxlength="1000" required></textarea>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">إقفال</button>
+                  <button type="button" class="btn btn-ghost" data-cancel>إلغاء</button>
+                </div>
+              </form>
+            </details>
+          </div>
+        <% }) %>
+      </section>
+    <% } %>
+
+    <%# ---------- ملاحظة / نقص ---------- %>
+    <section class="card">
+      <div class="card-title"><span class="card-icon"><%- icon('message') %></span><h2>ملاحظة أو نقص</h2></div>
+      <form method="post" action="/documents/<%= doc.id %>/notes" class="form form-tight" data-once>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label for="note-text" class="sr-only">النص</label>
+        <textarea class="input" id="note-text" name="text" rows="2" maxlength="1000" placeholder="الملاحظة أو وصف النقص" required></textarea>
+        <div class="btn-row">
+          <button type="submit" name="kind" value="note" class="btn btn-ghost"><%- icon('message') %> إضافة ملاحظة</button>
+          <button type="submit" name="kind" value="shortage" class="btn btn-danger-outline"><%- icon('alert') %> تسجيل نقص</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="detail-side">
+    <section class="card">
+      <div class="card-title"><span class="card-icon"><%- icon('file') %></span><h2>بيانات الفسح</h2></div>
+      <dl class="facts">
+        <% if (doc.doc_no) { %><div><dt>رقم الفسح</dt><dd><%= doc.doc_no %></dd></div><% } %>
+        <% if (doc.sales_order_no) { %><div><dt>رقم أمر الشراء</dt><dd dir="ltr"><%= doc.sales_order_no %></dd></div><% } %>
+        <% if (doc.items_count) { %><div><dt>الأصناف</dt><dd><%= doc.items_count %> صنف<% if (doc.items_qty) { %> · <%= doc.items_qty %> قطعة<% } %></dd></div><% } %>
+        <% if (doc.doc_date) { %><div><dt>تاريخ الفسح</dt><dd><%= doc.doc_date %></dd></div><% } %>
+        <div><dt>وصل للمستودع</dt><dd><%= formatRiyadh(doc.received_at) %></dd></div>
+        <% if (user.role === 'admin') { %>
+          <% if (doc.handed_by_name) { %><div><dt>سلّمه للموصل</dt><dd><%= doc.handed_by_name %></dd></div><% } %>
+          <% if (doc.source_device) { %><div><dt>طُبع من جهاز</dt><dd><%= doc.source_device %></dd></div><% } %>
+        <% } %>
+      </dl>
+      <% if (attachments.length) { %>
+        <div class="attach-list">
+          <span class="attach-title"><%- icon('file') %> سند التسليم</span>
+          <div class="attach-items">
+            <% attachments.forEach(function (a) { %>
+              <a class="attach-item" href="/documents/<%= doc.id %>/attachments/<%= a.id %>" target="_blank" rel="noopener">
+                <% if (a.isImage) { %><img src="/documents/<%= doc.id %>/attachments/<%= a.id %>" alt="سند التسليم" loading="lazy"><% } else { %><span class="attach-pdf"><%- icon('file') %> PDF</span><% } %>
+              </a>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+      <% if (files.length) { %>
+        <% if (files.length > 1) { %>
+          <a class="btn btn-ghost btn-block" href="/documents/<%= doc.id %>/compare"><%- icon('eye') %> قارن النسخ</a>
+          <div class="versions">
+            <span class="muted">النسخ السابقة:</span>
+            <% files.slice(1).forEach(function (f) { %>
+              <a href="/documents/<%= doc.id %>/view?v=<%= f.version %>">النسخة <%= f.version %> (<%= formatRiyadh(f.created_at) %>)</a>
+            <% }) %>
+          </div>
+        <% } %>
+      <% } else { %>
+        <div class="alert alert-warn"><%- icon('alert') %><span>ملف الـ PDF غير موجود</span></div>
+      <% } %>
+      <% if (user.role === 'admin' && !doc.problems.length) { %>
+        <details class="customer-edit">
+          <summary class="summary-link"><%- icon('edit') %> تصحيح العميل</summary>
+          <%- include('partials/customer-form', { compact: false }) %>
+        </details>
+      <% } %>
+    </section>
+
+    <%# ---------- السجل ---------- %>
+    <section class="card">
+      <div class="card-title"><span class="card-icon"><%- icon('clock') %></span><h2>السجل</h2></div>
+      <ol class="timeline">
+        <% events.forEach(function (e) { var ei = eventIcon(e); %>
+          <li class="event-<%= e.type %>">
+            <span class="feed-icon tone-<%= ei.tone %>"><%- icon(ei.name) %></span>
+            <div class="timeline-body">
+              <div class="timeline-text">
+                <% if (e.type === 'note') { %><span class="tag">ملاحظة</span> <%= e.text %>
+                <% } else if (e.type === 'shortage') { %><span class="tag tag-danger">نقص</span> <%= e.text %>
+                <% } else if (e.type === 'shortage_closed') { %><span class="tag tag-success">إقفال نقص</span> <%= e.text %>
+                <% } else if (e.type === 'correction') { %><span class="tag tag-warn">تصحيح</span> رجعت الحالة من "<%= statusLabels[e.from_status] %>" إلى "<%= statusLabels[e.to_status] %>" — السبب: <%= e.text %>
+                <% } else { %><%= e.text || e.type %><% if (e.courier_name) { %>: <%= e.courier_name %><% } %><% if (e.worker_name) { %> — يجهّزه <%= e.worker_name %><% } %><% } %>
+              </div>
+              <div class="timeline-meta">
+                <%= formatRiyadh(e.created_at) %><% if (e.user_name && user.role === 'admin') { %> · <%= e.user_name %><% } %>
+              </div>
+            </div>
+          </li>
+        <% }) %>
+      </ol>
+    </section>
+
+    <% if (user.role === 'admin' && customerMessages.length) { %>
+      <section class="card">
+        <div class="card-title"><span class="card-icon tone-success"><%- icon('message') %></span><h2>رسائل العميل في واتساب</h2></div>
+        <ul class="item-list">
+          <% customerMessages.forEach(function (n) { %>
+            <li class="msg-row">
+              <div class="msg-row-main">
+                <div class="item-text"><%= n.text %></div>
+                <div class="item-meta"><%= messageEventLabels[n.event_type] || '' %> · <%= formatWhen(n.sent_at || n.created_at) %><% if (n.last_error) { %> · <%= n.last_error %><% } %></div>
+              </div>
+              <span class="msg-state msg-<%= n.state %>"><%= messageStateLabels[n.state] || n.state %></span>
+            </li>
+          <% }) %>
+        </ul>
+      </section>
+    <% } %>
+
+    <% if (closedShortages.length) { %>
+      <section class="card">
+        <div class="card-title"><span class="card-icon tone-success"><%- icon('checkCircle') %></span><h2>نواقص مقفولة</h2></div>
+        <% closedShortages.forEach(function (s) { %>
+          <div class="shortage shortage-closed">
+            <div class="shortage-text"><%= s.text %></div>
+            <div class="item-meta"><%= formatRiyadh(s.created_at) %><% if (s.user_name) { %> · <%= s.user_name %><% } %></div>
+            <div class="shortage-resolution"><strong>الحل:</strong> <%= s.resolution %></div>
+            <div class="item-meta"><%= formatRiyadh(s.closed_at) %><% if (s.closed_by) { %> · <%= s.closed_by %><% } %></div>
+          </div>
+        <% }) %>
+      </section>
+    <% } %>
+
+    <%# ---------- تصحيح (الإدارة فقط) ---------- %>
+    <% if (user.role === 'admin' && previousStatus) { %>
+      <section class="card card-quiet">
+        <details>
+          <summary class="summary-link"><%- icon('undo') %> تصحيح: إرجاع الحالة خطوة للخلف</summary>
+          <form method="post" action="/documents/<%= doc.id %>/correct" class="form"
+                data-confirm="ترجع حالة الفسح من &quot;<%= doc.statusLabel %>&quot; إلى &quot;<%= statusLabels[previousStatus] %>&quot;؟" data-once>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="expected_status" value="<%= doc.status %>">
+            <label for="reason">سبب التصحيح</label>
+            <textarea class="input" id="reason" name="reason" rows="2" maxlength="1000" required></textarea>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-danger-outline">تصحيح الحالة</button>
+              <button type="button" class="btn btn-ghost" data-cancel>إلغاء</button>
+            </div>
+          </form>
+        </details>
+      </section>
+    <% } %>
+  </div>
+</div>
+
+<%- include('partials/foot') %>

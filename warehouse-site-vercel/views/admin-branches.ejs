@@ -1,0 +1,128 @@
+<%- include('partials/head', { nav: 'branches', wide: true }) %>
+<%
+  // كل فرع في سطر ومعه أجهزته (لو فيه جهاز على فرع انشال من القائمة يطلع بعد)
+  var branchList = installBranches.slice();
+  devices.forEach(function (d) { if (d.branch && branchList.indexOf(d.branch) < 0) branchList.push(d.branch); });
+%>
+
+<div class="page-head">
+  <h1>أجهزة المحاسبين</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-danger" role="alert"><%- icon('alert') %><span><%= error %></span></div><% } %>
+<% if (!installerReady) { %>
+  <div class="alert alert-warn"><%- icon('alert') %><span>ملف الطابعة غير موجود على السيرفر</span></div>
+<% } %>
+
+<section class="card br-card">
+  <div class="br-row br-row-head" aria-hidden="true">
+    <span>الفرع</span><span>الأجهزة</span><span></span>
+  </div>
+
+  <%# الجهاز الرئيسي: برنامج الواتساب (يرسل الرسائل ويلتقط طابعة جهازه) %>
+  <% if (locals.mainInstallerReady) { %>
+    <div class="br-row">
+      <div class="br-name"><strong>الجهاز الرئيسي</strong><span class="tag">برنامج الواتساب</span></div>
+      <div class="br-devs">
+        <div class="br-dev">
+          <%- icon('send') %>
+          <% if (mainOnline) { %><span class="br-dev-meta text-success">شغّال ومتصل بالموقع</span><% } else { %><span class="br-dev-meta text-danger">ما يرد</span><% } %>
+        </div>
+      </div>
+      <div class="br-actions">
+        <a class="btn btn-primary btn-small" href="/admin/branches/main-installer"><%- icon('download') %> تحميل برنامج الواتساب</a>
+      </div>
+    </div>
+  <% } %>
+
+  <% branchList.forEach(function (b) {
+    var list = devices.filter(function (d) { return d.branch === b; });
+    var known = installBranches.indexOf(b) >= 0;
+    var open = editing === b;
+  %>
+    <div class="br-row<%= open ? ' br-row-open' : '' %>" id="br-<%= encodeURIComponent(b) %>">
+      <div class="br-name">
+        <strong>فرع <%= b %></strong>
+        <% if (b === mainBranch) { %><span class="tag">الرئيسي</span><% } %>
+      </div>
+
+      <div class="br-devs">
+        <% if (!list.length) { %>
+          <span class="muted">ما فيه أجهزة</span>
+        <% } %>
+        <% list.forEach(function (d) { %>
+          <div class="br-dev<%= d.state === 'off' ? ' br-dev-off' : '' %>">
+            <%- icon('printer') %>
+            <span class="br-dev-name"><%= d.name %></span>
+            <span class="br-dev-meta"><% if (d.state === 'off') { %>موقوف<% } else if (d.last_seen_at) { %>آخر تواصل <%= timeAgoAr(d.last_seen_at, now) %><% } else { %>ما تواصل للحين<% } %></span>
+            <% if (d.waiting) { %><span class="br-dev-warn"><%= d.waiting %> مستند ينتظر الإرسال</span><% } %>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="br-actions">
+        <% if (known) { %>
+          <a class="btn btn-primary btn-small<%= installerReady ? '' : ' disabled' %>" href="/admin/branches/installer?branch=<%= encodeURIComponent(b) %>"<%- installerReady ? '' : ' aria-disabled="true" tabindex="-1"' %>><%- icon('download') %> تحميل ملف الطابعة</a>
+        <% } %>
+        <% if (open) { %>
+          <a class="btn btn-ghost btn-small" href="/admin/branches">إغلاق</a>
+        <% } else { %>
+          <a class="btn btn-ghost btn-small" href="/admin/branches?edit=<%= encodeURIComponent(b) %>#br-<%= encodeURIComponent(b) %>"><%- icon('edit') %> تعديل</a>
+        <% } %>
+      </div>
+
+      <% if (open) { %>
+        <div class="br-edit">
+          <% if (b === mainBranch) { %>
+            <form method="post" action="/admin/branches/main" class="br-edit-line" data-once>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <label for="main-branch" class="br-edit-key">اسم الفرع</label>
+              <input class="input" id="main-branch" name="name" type="text" maxlength="40" value="<%= mainBranch %>" required>
+              <button type="submit" class="btn btn-primary">حفظ</button>
+            </form>
+          <% } %>
+
+          <% list.forEach(function (d) { %>
+            <div class="br-edit-dev">
+              <strong class="br-edit-key"><%= d.name %></strong>
+              <form method="post" action="/admin/branches/<%= d.id %>/branch" class="br-edit-line" data-once>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <label for="dev-branch-<%= d.id %>" class="sr-only">فرع الجهاز</label>
+                <select class="input" id="dev-branch-<%= d.id %>" name="branch">
+                  <% installBranches.forEach(function (o) { %><option value="<%= o %>"<%= o === d.branch ? ' selected' : '' %>>فرع <%= o %></option><% }) %>
+                </select>
+                <button type="submit" class="btn btn-ghost">نقل للفرع</button>
+              </form>
+              <form method="post" action="/admin/branches/<%= d.id %>/active" data-once<% if (d.state !== 'off') { %> data-confirm="إيقاف جهاز <%= d.name %>؟ ما يقدر يرسل شيء لين تشغّله."<% } %>>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="active" value="<%= d.state === 'off' ? '1' : '' %>">
+                <% if (d.state === 'off') { %>
+                  <button type="submit" class="btn btn-ghost">تشغيل الجهاز</button>
+                <% } else { %>
+                  <button type="submit" class="btn btn-danger-outline">إيقاف الجهاز</button>
+                <% } %>
+              </form>
+            </div>
+          <% }) %>
+
+          <% if (known) { %>
+            <form method="post" action="/admin/branches/rotate" data-once data-confirm="ملف فرع <%= b %> القديم يوقف وما يركّب أجهزة جديدة (الأجهزة المركّبة تكمل عادي). متأكد؟">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="branch" value="<%= b %>">
+              <button type="submit" class="btn btn-danger-outline">إيقاف ملف الطابعة القديم</button>
+            </form>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  <% }) %>
+
+  <form method="post" action="/admin/branches/add" class="br-add" data-once>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label for="new-branch" class="sr-only">اسم الفرع</label>
+    <input class="input" id="new-branch" name="name" type="text" maxlength="40" placeholder="اسم فرع جديد" required>
+    <button type="submit" class="btn btn-ghost"><%- icon('plus') %> إضافة فرع</button>
+  </form>
+</section>
+
+<%- include('partials/foot') %>

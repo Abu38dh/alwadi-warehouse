@@ -1,0 +1,2550 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إرسال المستندات الإلكتروني | شركة الوادي لقطع غيار السيارات</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <script src="pdf.js"></script>
+  <style>
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --brand-blue: #1d4ed8;
+      --brand-blue-hover: #1e40af;
+      --brand-blue-light: #eff6ff;
+      --brand-gold: #b45309;
+      --brand-gold-light: #fef3c7;
+      --surface-bg: #f8fafc;
+      --surface-card: #ffffff;
+      --surface-subtle: #f1f5f9;
+      --border-color: #e2e8f0;
+      --border-dark: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --success: #059669;
+      --success-light: #ecfdf5;
+      --success-border: #a7f3d0;
+      --danger: #dc2626;
+      --danger-light: #fef2f2;
+      --danger-border: #fecaca;
+      --warning: #d97706;
+      --warning-light: #fffbeb;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+      --shadow-card: 0 4px 14px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+      --shadow-hover: 0 10px 25px -3px rgba(15, 23, 42, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--surface-bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* ================================================= */
+    /* الهيدر الرئيسي الفاخر وعالي الوضوح */
+    /* ================================================= */
+    .top-header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.04);
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-container {
+      background: #ffffff;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand-logo-img {
+      max-height: 44px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .brand-title-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title-box h1 {
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.3px;
+    }
+
+    .brand-title-box span {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* ألسنة التبويب المركزية */
+    .header-tabs {
+      display: flex;
+      background: var(--surface-subtle);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      gap: 4px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--primary);
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--brand-blue);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    /* أزرار الإجراءات في الهيدر */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .wa-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      transition: all 0.25s;
+    }
+
+    .wa-badge-pill.connected {
+      background: var(--success-light);
+      color: var(--success);
+      border: 1px solid var(--success-border);
+    }
+
+    .wa-badge-pill.waiting {
+      background: var(--warning-light);
+      color: var(--warning);
+      border: 1px solid #fde68a;
+    }
+
+    .wa-badge-pill.reconnecting {
+      background: #eff6ff;
+      color: #2563eb;
+      border: 1px solid #bfdbfe;
+    }
+
+    .pulse-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: currentColor;
+      box-shadow: 0 0 0 0 currentColor;
+      animation: pulseAnimation 1.8s infinite;
+    }
+
+    @keyframes pulseAnimation {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      }
+
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
+      }
+
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    .btn-header-folder {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--brand-blue);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(29, 78, 216, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .btn-header-folder:hover {
+      background: var(--brand-blue-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(29, 78, 216, 0.3);
+    }
+
+    /* ================================================= */
+    /* مساحة العمل الرئيسية */
+    /* ================================================= */
+    .app-body {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .app-tab-pane {
+      display: none;
+    }
+
+    .app-tab-pane.active {
+      display: block;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ================================================= */
+    /* بطاقات الإحصائيات (KPI Metric Cards) */
+    /* ================================================= */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+
+    .stat-card:hover {
+      box-shadow: var(--shadow-card);
+      border-color: var(--border-dark);
+    }
+
+    .stat-info span {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-info h2 {
+      font-size: 1.65rem;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .stat-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stat-icon-wa {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .stat-icon-sent {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .stat-icon-review {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    .stat-icon-customers {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    /* ================================================= */
+    /* بطاقة حالة الواتساب الرئيسية (WhatsApp Hero Box) */
+    /* ================================================= */
+    .hero-wa-panel {
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    /* حالة المتصل بنجاح */
+    .hero-connected-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+      border: 1px solid var(--success-border);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+    }
+
+    .connected-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .connected-icon-badge {
+      width: 52px;
+      height: 52px;
+      background: #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.35);
+      flex-shrink: 0;
+    }
+
+    .connected-text h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #065f46;
+      margin-bottom: 3px;
+    }
+
+    .connected-text p {
+      font-size: 0.85rem;
+      color: #047857;
+      font-weight: 600;
+    }
+
+    /* حالة انتظار الباركود QR */
+    .hero-qr-box {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      flex-wrap: wrap;
+    }
+
+    .qr-canvas-holder {
+      width: 210px;
+      height: 210px;
+      background: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      flex-shrink: 0;
+    }
+
+    .qr-canvas-holder svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .qr-guide-steps {
+      flex: 1;
+      min-width: 320px;
+    }
+
+    .qr-guide-header {
+      margin-bottom: 14px;
+    }
+
+    .qr-guide-header h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .qr-guide-header p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .step-item {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--brand-blue);
+      color: #ffffff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-item span {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.4;
+    }
+
+    /* حالة جاري التحميل والتهيئة */
+    .hero-loading-box {
+      text-align: center;
+      padding: 30px 20px;
+    }
+
+    .loading-spinner-circle {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--brand-blue);
+      border-radius: 50%;
+      animation: spinAnim 0.9s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spinAnim {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ================================================= */
+    /* شريط التنبيه الحرج للمستندات المتعثرة */
+    /* ================================================= */
+    .critical-alert-bar {
+      background: var(--danger-light);
+      border: 1px solid var(--danger-border);
+      border-right: 6px solid var(--danger);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .critical-alert-bar.active {
+      display: flex;
+    }
+
+    .alert-content-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .alert-content-left h4 {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--danger);
+      margin-bottom: 2px;
+    }
+
+    .alert-content-left p {
+      font-size: 0.83rem;
+      color: #991b1b;
+      font-weight: 600;
+    }
+
+    /* ================================================= */
+    /* قسم حركة المستندات الفورية (Live Stream) */
+    /* ================================================= */
+    .section-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .feed-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .feed-title h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .feed-title p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .feed-filter-pills {
+      display: flex;
+      background: var(--surface-subtle);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      gap: 4px;
+      border: 1px solid var(--border-color);
+    }
+
+    .filter-pill {
+      padding: 6px 16px;
+      border: none;
+      background: transparent;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-pill.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* بطاقة المستند الواحد في السجل */
+    .stream-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .doc-row-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .doc-row-card:hover {
+      border-color: var(--border-dark);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+
+    .doc-row-card.is-sent {
+      border-right: 5px solid var(--success);
+    }
+
+    .doc-row-card.is-failed {
+      border-right: 5px solid var(--danger);
+      background: #fffdfd;
+    }
+
+    .doc-meta-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .doc-type-badge {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .type-invoice {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .type-clearance {
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+    }
+
+    .type-statement {
+      background: #f5f3ff;
+      color: #6d28d9;
+      border: 1px solid #ddd6fe;
+    }
+
+    .type-return {
+      background: #fff7ed;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+    }
+
+    .doc-main-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .doc-file-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .doc-secondary-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      flex-wrap: wrap;
+    }
+
+    .meta-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .meta-tag strong {
+      color: var(--primary);
+    }
+
+    .doc-actions-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-action-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-main);
+      transition: all 0.15s;
+    }
+
+    .btn-action-sm:hover {
+      background: var(--surface-subtle);
+      border-color: var(--border-dark);
+    }
+
+    .btn-retry-primary {
+      background: var(--brand-blue);
+      color: #ffffff;
+      border-color: var(--brand-blue);
+    }
+
+    .btn-retry-primary:hover {
+      background: var(--brand-blue-hover);
+      border-color: var(--brand-blue-hover);
+      color: #ffffff;
+    }
+
+    /* ================================================= */
+    /* جدول قاعدة بيانات العملاء (Customer Table) */
+    /* ================================================= */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+    }
+
+    .data-table th {
+      background: var(--surface-subtle);
+      padding: 14px 18px;
+      font-size: 0.83rem;
+      font-weight: 800;
+      color: var(--primary);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .data-table td {
+      padding: 14px 18px;
+      font-size: 0.88rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .data-table tr:hover td {
+      background-color: #fafbfc;
+    }
+
+    /* ================================================= */
+    /* النوافذ المنبثقة (Modals) */
+    /* ================================================= */
+    .modal-curtain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 20px;
+    }
+
+    .modal-curtain.active {
+      display: flex;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .modal-header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      color: var(--primary);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: var(--brand-blue);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .btn-primary {
+      background: var(--brand-blue);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-blue-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-subtle);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    /* مودال معاينة الـ PDF */
+    .modal-pdf-box {
+      width: 95%;
+      max-width: 1050px;
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      padding: 18px 24px;
+    }
+
+    #pdf-canvas-container {
+      flex: 1;
+      width: 100%;
+      overflow-y: auto;
+      background: #525659;
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+  
+    /* ===== فواتير نقدي ===== */
+    .cash-box { background: #fffbeb; border: 2px solid #f59e0b; border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; }
+    .cash-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+    .cash-title { font-weight: 800; font-size: 1rem; color: #92400e; }
+    .cash-hint { font-size: 0.8rem; color: #b45309; font-weight: 700; }
+    .cash-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; background: #fff; border: 1px solid #fde68a; border-radius: 10px; padding: 8px 12px; margin-top: 6px; }
+    .cash-item .info { font-size: 0.85rem; font-weight: 700; }
+    .cash-item .info small { color: var(--text-muted); font-weight: 600; margin-inline-start: 8px; }
+    .cash-item .acts { display: flex; gap: 6px; }
+
+    /* ===== تقارير العملاء ===== */
+    .rep-toolbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+    .rep-controls { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+    .rep-controls label { display: flex; flex-direction: column; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); gap: 4px; }
+    .rep-select { padding: 7px 10px !important; min-width: 130px; font-size: 0.85rem !important; }
+    .rep-search { padding: 7px 10px !important; width: 150px; font-size: 0.85rem !important; }
+    .rep-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .rep-card { border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 14px; cursor: pointer; background: #fff; transition: box-shadow .15s; }
+    .rep-card:hover { box-shadow: 0 2px 10px rgba(15, 23, 42, .08); }
+    .rep-card.active { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(15, 23, 42, .12); }
+    .rep-card .n { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
+    .rep-card .t { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
+    .rep-card.good .n { color: var(--success); } .rep-card.bad .n { color: var(--danger); } .rep-card.warn .n { color: var(--warning); }
+    .rep-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .rep-pill { border: 1px solid var(--border-color); background: #fff; border-radius: 999px; padding: 5px 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; color: var(--text-muted); font-family: inherit; }
+    .rep-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .rep-table-wrap { overflow: auto; max-height: 62vh; border: 1px solid var(--border-color); border-radius: 10px; }
+    .rep-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .rep-table th { position: sticky; top: 0; background: var(--surface-subtle); text-align: right; padding: 9px 10px; font-weight: 800; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+    .rep-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+    .rep-table tbody tr { cursor: pointer; }
+    .rep-table tbody tr:hover { background: #f8fafc; }
+    .rep-num { font-weight: 800; direction: ltr; display: inline-block; }
+    .rep-zero { color: #cbd5e1; }
+    .rep-yes { color: var(--success); font-weight: 800; }
+    .rep-no { color: var(--danger); font-weight: 700; }
+    .rep-tag { font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; display: inline-block; }
+    .rep-tag.sent { background: #ecfdf5; color: var(--success); }
+    .rep-tag.review { background: #fef2f2; color: var(--danger); }
+    .rep-tag.cash, .rep-tag.stopped { background: var(--surface-subtle); color: var(--text-muted); }
+    .rep-modal { position: fixed; inset: 0; background: rgba(15, 23, 42, .45); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 16px; }
+    .rep-modal.active { display: flex; }
+    .rep-modal-box { background: #fff; border-radius: 14px; padding: 20px; width: 100%; max-width: 900px; }
+      body.hosted .local-only { display: none !important; }
+  </style>
+</head>
+
+<body>
+
+  <!-- ================================================= -->
+  <!-- الهيدر العلوي الموحد والراقي -->
+  <!-- ================================================= -->
+  <header class="top-header">
+    <div class="header-inner">
+      <!-- الشعار وهوية المؤسسة عالية التباين -->
+      <div class="brand-section">
+        <div class="logo-container">
+          <img src="logo.png" alt="شركة الوادي لقطع غيار السيارات" class="brand-logo-img">
+        </div>
+        <div class="brand-title-box">
+          <h1>شركة الوادي لقطع غيار السيارات</h1>
+          <span>نظام إرسال الفواتير والمستندات الذكي عبر واتساب</span>
+        </div>
+      </div>
+
+      <!-- ألسنة التبويب العلوية المباشرة -->
+      <nav class="header-tabs">
+        <button class="tab-btn active" id="btn-tab-dashboard" onclick="switchMainTab('dashboard')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>لوحة العمليات الحية</span>
+        </button>
+        <button class="tab-btn" id="btn-tab-settings" onclick="switchMainTab('settings')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
+          <span>الإعدادات والرسائل</span>
+        </button>
+        <button class="tab-btn" id="btn-tab-reports" onclick="switchMainTab('reports')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>تقارير العملاء</span>
+        </button>
+      </nav>
+
+      <!-- إجراءات سريعة وشارة الواتساب -->
+      <div class="header-actions">
+        <div class="wa-badge-pill waiting" id="badge-wa-header">
+          <span class="pulse-dot"></span>
+          <span id="text-wa-header">جاري الاتصال...</span>
+        </div>
+        <button class="btn-header-folder local-only" onclick="triggerOpenRootFolder()" title="فتح مجلد الفواتير على جهازك">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>مجلد الفواتير</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================================================= -->
+  <!-- مساحة التطبيق الرئيسية -->
+  <!-- ================================================= -->
+  <main class="app-body">
+
+    <!-- =============================================== -->
+    <!-- 1. تبويب العمليات والمراقبة (Dashboard) -->
+    <!-- =============================================== -->
+    <section id="pane-dashboard" class="app-tab-pane active">
+
+      <!-- فواتير نقدي (9999): ما تنرسل، تنتظر الطباعة اليدوية — يبقى ظاهر لين تنطبع -->
+      <div class="cash-box" id="cash-box" hidden>
+        <div class="cash-head">
+          <span class="cash-title">💵 فواتير نقدي — ما انرسلت، تحتاج طباعة يدوية <span id="cash-count"></span></span>
+          <span class="cash-hint">بعد ما تطبعها اضغط "تمت الطباعة"</span>
+        </div>
+        <div id="cash-list"></div>
+      </div>
+
+      <!-- فسوحات تنتظر الرفع لموقع المستودع (يظهر فقط عند وجود ما ينتظر) -->
+      <div id="wh-pending-banner" class="section-card" style="display:none; margin-bottom:16px; padding:12px 18px; font-weight:700; font-size:0.9rem;"></div>
+
+      <!-- بطاقات الإحصائيات الـ 4 -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-info">
+            <span>حالة اتصال الواتساب</span>
+            <h2 id="kpi-wa-status" style="font-size:1.15rem; color:#059669;">جاري التهيئة...</h2>
+          </div>
+          <div class="stat-icon-wrapper stat-icon-wa">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+              </path>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <span>مستندات تم إرسالها بنجاح</span>
+            <h2 id="kpi-sent-count">0</h2>
+          </div>
+          <div class="stat-icon-wrapper stat-icon-sent">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <span>مستندات تحتاج مراجعة</span>
+            <h2 id="kpi-review-count" style="color:var(--danger);">0</h2>
+          </div>
+          <div class="stat-icon-wrapper stat-icon-review">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <span>إجمالي العملاء المسجلين</span>
+            <h2 id="kpi-customers-count">0</h2>
+          </div>
+          <div class="stat-icon-wrapper stat-icon-customers">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- بطاقة حالة الواتساب الذكية المتكيفة -->
+      <div class="hero-wa-panel" id="panel-wa-hero">
+
+        <!-- واجهة: متصل بنجاح -->
+        <div id="wa-view-connected" class="hero-connected-box" style="display:none;">
+          <div class="connected-left">
+            <div class="connected-icon-badge">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="connected-text">
+              <h3>خدمة واتساب متصلة وجاهزة للإرسال الآلي الفوري</h3>
+              <p id="label-connected-details">الجلسة نشطة وتراقب مجلد الفواتير باستمرار. أي مستند يوضع في المجلد سيتم
+                إرساله للعميل بالثواني.</p>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-action-sm local-only" onclick="triggerOpenRootFolder()"
+              style="background:#ffffff; color:#059669; font-weight:800; border-color:#a7f3d0; padding:8px 16px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>فتح مجلد المراقبة</span>
+            </button>
+            <button class="btn-action-sm" onclick="triggerResetWhatsApp()" title="تسجيل الخروج وربط رقم آخر"
+              style="background:#ffffff; color:var(--text-muted); padding:8px 14px;">
+              <span>تبديل الرقم / خروج</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- واجهة: بانتظار مسح الرمز QR -->
+        <div id="wa-view-qr" class="hero-qr-box" style="display:none;">
+          <div class="qr-canvas-holder" id="qr-holder-canvas">
+            <!-- يتم حقن الـ SVG هنا -->
+          </div>
+          <div class="qr-guide-steps">
+            <div class="qr-guide-header">
+              <h2>ربط تطبيق واتساب المؤسسي</h2>
+              <p>امسح رمز الاستجابة السريعة (QR) بكاميرا واتساب في هاتفك لمرة واحدة فقط لتفعيل الإرسال التلقائي المستمر.
+              </p>
+            </div>
+            <div class="steps-grid">
+              <div class="step-item">
+                <div class="step-num">1</div>
+                <span>افتح تطبيق واتساب على هاتفك واضغط على (الإعدادات).</span>
+              </div>
+              <div class="step-item">
+                <div class="step-num">2</div>
+                <span>اختر (الأجهزة المرتبطة) ثم اضغط على زر (ربط جهاز).</span>
+              </div>
+              <div class="step-item">
+                <div class="step-num">3</div>
+                <span>وجّه الكاميرا نحو هذا الرمز ليتم الاتصال فورياً.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- واجهة: جاري التحميل والتهيئة السريعة -->
+        <div id="wa-view-loading" class="hero-loading-box">
+          <div class="loading-spinner-circle"></div>
+          <h3 style="font-size:1.15rem; font-weight:800; color:var(--primary); margin-bottom:4px;"
+            id="text-loading-status">جاري تهيئة خدمة الواتساب واستعادة الجلسة...</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">يتم فحص اتصال المتصفح في الخلفية
+            وتجهيز طابور المستندات.</p>
+          <div style="display:flex; justify-content:center; gap:10px;">
+            <button class="btn-action-sm btn-retry-primary" onclick="triggerResetWhatsApp()"
+              style="padding:9px 18px; font-size:0.88rem; border-radius:8px;">
+              🔄 ربط جهاز جديد (توليد باركود جديد)
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- تنبيه المستندات المتعثرة -->
+      <div class="critical-alert-bar" id="banner-failed-alert">
+        <div class="alert-content-left">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            style="color:var(--danger); flex-shrink:0;">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <div>
+            <h4>تنبيه: تم رصد مستندات تعذر إرسالها وتحتاج إلى مراجعة</h4>
+            <p id="text-failed-alert-details">يرجى إضافة أرقام العملاء الناقصة أو إعادة إرسالها من الجدول أدناه.</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-action-sm btn-retry-primary" onclick="applyStreamFilter('review')">عرض المستندات
+            المتعثرة</button>
+          <button class="btn-action-sm" onclick="triggerDismissAllFailed()" style="color:var(--danger);">✕
+            إخفاء</button>
+        </div>
+      </div>
+
+      <!-- قسم سجل حركة المستندات الفوري -->
+      <div class="section-card">
+        <div class="feed-header-bar">
+          <div class="feed-title">
+            <h3>سجل حركة المستندات اللحظي</h3>
+            <p>مراقبة مباشرة ومستمرة للفواتير والفسوحات والمرتجعات وكشوف الحساب التي تضاف في المجلد</p>
+          </div>
+          <div class="feed-filter-pills">
+            <button class="filter-pill active" id="filter-btn-all" onclick="applyStreamFilter('all')">كافة
+              المستندات</button>
+            <button class="filter-pill" id="filter-btn-sent" onclick="applyStreamFilter('sent')">المرسلة بنجاح</button>
+            <button class="filter-pill" id="filter-btn-review" onclick="applyStreamFilter('review')">المتعثرة (تحتاج
+              مراجعة)</button>
+          </div>
+        </div>
+
+        <div class="stream-container" id="container-documents-stream">
+          <div
+            style="text-align: center; padding: 50px 20px; color: var(--text-muted); background: var(--surface-subtle); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+            جاري استرجاع سجلات المستندات الحية...
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =============================================== -->
+    <!-- 3. تبويب الإعدادات والرسائل (Settings) -->
+    <!-- =============================================== -->
+    <section id="pane-settings" class="app-tab-pane">
+      <div class="section-card" style="margin-bottom:24px;">
+        <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:6px;">إعدادات الإرسال</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">فترة الانتظار بين كل رسالة واتساب والتي بعدها:</p>
+
+        <div class="form-group">
+          <label>مهلة التأخير بين الرسائل (بالثواني):</label>
+          <input type="number" class="input-field" id="field-delay-sec" min="1" max="60" style="max-width:180px;">
+        </div>
+        <button class="btn-primary" onclick="submitGeneralSettings()">حفظ</button>
+      </div>
+
+      <div class="section-card" style="margin-bottom:24px;" id="card-shutdown">
+        <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:6px;">تشغيل البرنامج</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">
+          البرنامج يعمل في الخلفية ويستمر في الإرسال حتى لو أغلقت هذه النافذة. لفتح النافذة مرة أخرى: اختصار "نظام إرسال المستندات" على سطح المكتب.
+        </p>
+        <button class="btn-secondary local-only" style="color:var(--danger);" onclick="shutdownApp()">إيقاف البرنامج</button>
+      </div>
+
+      <div class="section-card" style="margin-bottom:24px;">
+        <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:6px;">نصوص الرسائل المصاحبة للمستندات</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">النص الذي يظهر للعميل أسفل ملف الـ
+          PDF عند إرساله عبر واتساب:</p>
+
+        <div class="form-group">
+          <label style="display:flex; justify-content:space-between; align-items:center; gap:10px;">نص رسالة فواتير المبيعات (Invoices):
+            <span class="send-toggle"><input type="checkbox" id="field-send-invoice"> إرسال الفواتير</span></label>
+          <input type="text" class="input-field" id="field-cap-invoice">
+        </div>
+        <div class="form-group">
+          <label style="display:flex; justify-content:space-between; align-items:center; gap:10px;">نص رسالة الفسوحات الجمركية (Clearances):
+            <span class="send-toggle"><input type="checkbox" id="field-send-clearance"> إرسال الفسوحات</span></label>
+          <input type="text" class="input-field" id="field-cap-clearance">
+        </div>
+        <div class="form-group">
+          <label style="display:flex; justify-content:space-between; align-items:center; gap:10px;">نص رسالة المرتجعات (Returns):
+            <span class="send-toggle"><input type="checkbox" id="field-send-return"> إرسال المرتجعات</span></label>
+          <input type="text" class="input-field" id="field-cap-return">
+        </div>
+        <div class="form-group">
+          <label style="display:flex; justify-content:space-between; align-items:center; gap:10px;">نص رسالة كشوف الحساب (Statements):
+            <span class="send-toggle"><input type="checkbox" id="field-send-statement"> إرسال كشوف الحساب</span></label>
+          <input type="text" class="input-field" id="field-cap-statement">
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin:-6px 0 14px;">النوع اللي تشيل علامة "إرسال" منه ما يُرسل أبداً، ويُحفظ في مجلد Stopped.</p>
+        <button class="btn-primary" onclick="submitCaptionsUpdate()">حفظ</button>
+      </div>
+
+      <div class="section-card" style="margin-bottom:24px;" id="card-warehouse">
+        <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:6px;">المستودع (الفسوحات)</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">
+          الفسح يُرسل لقروب المستودع ويُرفع لموقع المستودع، ولا يُرسل لقروب العميل. إذا تُركت الخانات كلها فاضية يبقى الفسح على وضعه السابق.
+          <br><strong>كل فرع له مستودعه:</strong> سوّ لكل فرع قروب واتساب واكتب في اسمه رقم خاص فيه ما يتكرر في أي قروب ثاني (مثل: <strong>مستودع جدة 95123698</strong>)، واكتب نفس الرقم هنا. فسح أي فرع يروح لقروب مستودع فرعه هو بس.
+        </p>
+        <div class="form-group">
+          <label id="wh-main-label" for="field-wh-number">رقم قروب المستودع (فرع هذا الجهاز):</label>
+          <input type="text" class="input-field" id="field-wh-number" dir="ltr" inputmode="numeric" placeholder="مثال: 95123698" autocomplete="off" spellcheck="false">
+          <p id="wh-main-status" style="font-size:0.8rem; margin-top:6px;"></p>
+        </div>
+        <div id="wh-branch-groups"></div>
+        <p id="wh-branches-note" style="font-size:0.8rem; color:var(--text-muted); margin:-6px 0 14px; display:none;"></p>
+        <div class="form-group local-only">
+          <label>رابط موقع المستودع:</label>
+          <input type="text" class="input-field" id="field-wh-url" dir="ltr" placeholder="https://" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="form-group local-only">
+          <label>مفتاح الربط (من صفحة "الربط مع البرنامج" في موقع المستودع):</label>
+          <input type="password" class="input-field" id="field-wh-key" dir="ltr" autocomplete="new-password" spellcheck="false">
+        </div>
+        <p id="wh-sync-status" style="font-size:0.85rem; margin:-6px 0 14px;"></p>
+        <button class="btn-primary" onclick="submitWarehouseSettings()">حفظ</button>
+      </div>
+
+      <div class="section-card local-only" id="card-linked-devices">
+        <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:6px;">الأجهزة المرتبطة</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">أجهزة المحاسبين التي تطبع على طابعة البرنامج وترسل المستندات إلى هذا الجهاز، والإرسال يتم من واتساب هذا الجهاز فقط.</p>
+        <div id="devices-disabled" style="display:none; color:var(--text-muted);">استقبال المستندات من الأجهزة الأخرى غير مفعّل.</div>
+        <div id="devices-panel">
+          <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:16px;">
+            <div>
+              <div style="font-size:0.8rem; color:var(--text-muted);">رمز الربط (أدخله في الجهاز الجديد — يتغير بعد كل ربط)</div>
+              <div id="pairing-code" style="font-size:2rem; font-weight:900; letter-spacing:0.3em; direction:ltr;">------</div>
+            </div>
+            <button class="btn-secondary" onclick="generateNewPairingCode()">رمز جديد</button>
+          </div>
+          <div id="devices-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================================================= -->
+    <!-- تقارير العملاء (الجهاز الرئيسي فقط) -->
+    <!-- ================================================= -->
+    <section id="pane-reports" class="app-tab-pane">
+      <div class="section-card" style="margin-bottom:18px;">
+        <div class="rep-toolbar">
+          <div>
+            <h3 style="font-size:1.15rem; font-weight:800; margin:0 0 4px;">تقارير العملاء</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin:0;" id="rep-list-info">جاري التحميل...</p>
+          </div>
+          <div class="rep-controls">
+            <label>من تاريخ <input type="date" id="rep-from" class="input-field rep-select" onchange="loadReports()"></label>
+            <label>إلى تاريخ <input type="date" id="rep-to" class="input-field rep-select" onchange="loadReports()"></label>
+            <input id="rep-search" class="input-field rep-search" placeholder="بحث برقم العميل" oninput="renderReports()">
+            <button class="btn-action-sm" onclick="exportReportExcel()" title="تحميل العملاء الظاهرين الآن (حسب الفلتر والبحث) كملف Excel">⬇ تصدير Excel</button>
+            <button class="btn-action-sm" onclick="document.getElementById('rep-import-file').click()" title="استيراد قائمة العملاء من ملف PDF أو CSV">📋 تحديث قائمة العملاء</button>
+            <input type="file" id="rep-import-file" accept=".pdf,.csv,.txt" style="display:none" onchange="importCustomerList(this)">
+          </div>
+        </div>
+
+        <div class="rep-cards" id="rep-cards"></div>
+
+        <div class="rep-filters" id="rep-filters"></div>
+
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <thead>
+              <tr>
+                <th>رقم العميل</th>
+                <th>فواتير</th>
+                <th>مرتجعات</th>
+                <th>كشف حساب</th>
+                <th>مشاكل</th>
+              </tr>
+            </thead>
+            <tbody id="rep-tbody"></tbody>
+          </table>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin:10px 0 0;" id="rep-count-line"></p>
+      </div>
+    </section>
+
+    <!-- تفاصيل عميل -->
+    <div class="rep-modal" id="rep-modal" onclick="if (event.target === this) closeCustomerModal()">
+      <div class="rep-modal-box">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+          <div>
+            <h3 style="margin:0 0 4px; font-size:1.1rem;" id="rep-modal-title"></h3>
+            <p style="margin:0; color:var(--text-muted); font-size:0.85rem;" id="rep-modal-sub"></p>
+          </div>
+          <button class="btn-action-sm" onclick="closeCustomerModal()">✕</button>
+        </div>
+        <div class="rep-table-wrap" style="margin-top:14px; max-height:60vh;">
+          <table class="rep-table">
+            <thead><tr><th>التاريخ</th><th>المستند</th><th>النتيجة</th><th>القروب</th><th>الجهاز</th><th>ملاحظة</th></tr></thead>
+            <tbody id="rep-modal-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+  </main>
+
+  <!-- ================================================= -->
+  <!-- النوافذ المنبثقة (Modals) -->
+  <!-- ================================================= -->
+
+  </div>
+
+  <!-- مودال معاينة الـ PDF المدمج -->
+  <div class="modal-curtain" id="modal-pdf-preview">
+    <div class="modal-card modal-pdf-box">
+      <div
+        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            style="color:var(--brand-blue);">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <h3 id="modal-pdf-title" style="margin:0; font-size:1.15rem; color:var(--primary); font-weight:800;">معاينة
+            وقراءة المستند</h3>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-action-sm local-only" onclick="triggerShowInFolder(currentPreviewFileName, currentPreviewFilePath)"
+            title="إظهار الملف في مجلد الويندوز">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>إظهار في المجلد</span>
+          </button>
+          <button class="btn-action-sm local-only"
+            onclick="triggerOpenExternalFile(currentPreviewFileName, currentPreviewFilePath)"
+            title="فتح ببرنامج الجهاز">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            <span>فتح خارجي</span>
+          </button>
+          <button class="btn-action-sm" onclick="closePdfPreviewModal()" style="color:var(--danger); font-weight:800;">
+            ✕ إغلاق
+          </button>
+        </div>
+      </div>
+      <div
+        style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:8px 14px; border:1px solid var(--border-color); border-bottom:none; border-radius:6px 6px 0 0;">
+        <span style="font-size:0.8rem; color:var(--text-muted); font-weight:700;">الصفحات بدقة كاملة:</span>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button class="btn-action-sm" style="padding:2px 10px;" onclick="changePdfZoom(-0.2)">تصغير -</button>
+          <span id="label-pdf-zoom"
+            style="font-size:0.8rem; font-weight:800; min-width:45px; text-align:center;">100%</span>
+          <button class="btn-action-sm" style="padding:2px 10px;" onclick="changePdfZoom(0.2)">تكبير +</button>
+        </div>
+      </div>
+      <div id="pdf-canvas-container">
+        <div style="color:#ffffff; font-weight:700; padding:40px;">جاري تجهيز صفحات المستند...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال حل تضارب أرقام العملاء -->
+  <div class="modal-curtain" id="modal-conflict-resolver">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div
+          style="width:48px; height:48px; background:#fffbeb; color:#d97706; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <h3>اختيار العميل المستهدف</h3>
+        <p>تم رصد أكثر من رقم عميل داخل المستند. يرجى اختيار الرقم الصحيح لإرسال الفاتورة إليه فوراً:</p>
+      </div>
+      <div id="container-conflict-options" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+        <!-- خيارات العملاء -->
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-secondary" onclick="hideConflictModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- حاوية الإشعارات المنبثقة -->
+  <div id="toast-alerts-container"
+    style="position:fixed; bottom:24px; left:24px; z-index:9999; display:flex; flex-direction:column; gap:10px; max-width:400px; width:90%; pointer-events:none;">
+  </div>
+
+  <!-- ================================================= -->
+  <!-- السكربت البرمجي المحدث والذكي -->
+  <!-- ================================================= -->
+  <script>
+    // على السيرفر (داخل موقع المستودع): نخفي أزرار الجهاز (المجلدات، الإيقاف، الشبكة المحلية، مفتاح الربط)
+    fetch('api/settings').then(r => r.json()).then(s => { if (s && s.hosted) document.body.classList.add('hosted'); }).catch(() => {});
+
+    // أي نص يجي من برا (أسماء ملفات، أسماء قروبات، أسباب) يُعرض ككلام عادي فقط، ولا يتنفذ منه شي
+    const safeText = (v) => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    // قيمة داخل onclick: تُرمَّز كلها (حتى ' ( ) ) فما تقدر تكسر الأمر
+    const encArg = (v) => encodeURIComponent(String(v == null ? '' : v)).replace(/['()!*~]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+    let internalLogCache = [];
+    let activeStreamFilter = 'all';
+
+    // تبديل التبويبات الرئيسية في الهيدر
+    function switchMainTab(tabId) {
+      document.querySelectorAll('.app-tab-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+      const targetPane = document.getElementById(`pane-${tabId}`);
+      const targetBtn = document.getElementById(`btn-tab-${tabId}`);
+      if (targetPane) targetPane.classList.add('active');
+      if (targetBtn) targetBtn.classList.add('active');
+
+      if (tabId === 'settings') {
+        populateSettingsInputs();
+      }
+      if (tabId === 'reports') {
+        loadReports();
+      }
+    }
+
+
+
+
+
+    async function sendStoppedDocument(encPath) {
+      if (!confirm('متأكد إن هذا المستند مو فسح؟ بيتفحص رقم العميل وقروبه مثل أي مستند ثم ينرسل.')) return;
+      try {
+        const d = await (await fetch('api/send-stopped', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filePath: decodeURIComponent(encPath) }) })).json();
+        if (d.success) showToastAlert('✅ تم الإرسال', 'انرسل المستند لقروب العميل', false);
+        else showToastAlert('ما انرسل', d.reason || d.message || '', true);
+      } catch (e) { showToastAlert('تعذر', e.message, true); }
+    }
+
+    // ================= فواتير نقدي =================
+    async function loadCashPending() {
+      let items = [];
+      try { items = (await (await fetch('api/cash-pending')).json()).items || []; } catch (_) { return; }
+      const box = document.getElementById('cash-box');
+      box.hidden = items.length === 0;
+      document.getElementById('cash-count').innerText = items.length ? `(${items.length})` : '';
+      document.getElementById('cash-list').innerHTML = items.map(it => {
+        const encName = encArg(it.fileName);
+        const encPath = encArg(String(it.filePath).replace(/\\/g, '/'));
+        return `<div class="cash-item">
+          <span class="info">${repEsc(it.docTypeLabel)} — عميل نقدي <bdi>${repEsc(it.customerNumber || '')}</bdi> <small>· <bdi>${repEsc(it.fileName)}</bdi> · ${fmtDate(it.at)}</small></span>
+          <span class="acts">
+            <button class="btn-action-sm" onclick="openPdfPreviewModal('${encName}', '${encPath}')">👁 معاينة</button>
+            <button class="btn-action-sm local-only" onclick="triggerShowInFolder('${encName}', '${encPath}')">📁 المجلد</button>
+            <button class="btn-action-sm btn-retry-primary" onclick="markCashPrinted('${encPath}')">تمت الطباعة ✓</button>
+          </span>
+        </div>`;
+      }).join('');
+    }
+
+    async function markCashPrinted(encPath) {
+      try {
+        const d = await (await fetch('api/cash-done', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filePath: decodeURIComponent(encPath) }) })).json();
+        if (!d.success) showToastAlert('تعذر', d.message || '', true);
+      } catch (e) { showToastAlert('تعذر', e.message, true); }
+      loadCashPending();
+    }
+
+    // ================= تقارير العملاء =================
+    let reportData = null;
+    let reportFilter = 'all';
+    const AR_MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const repEsc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const monthLabel = (m) => { const [y, mo] = String(m).split('-'); return `${AR_MONTHS[Number(mo) - 1] || mo} ${y}`; };
+    const fmtDate = (iso) => {
+      if (!iso) return '';
+      const d = new Date(iso);
+      const p = (n) => String(n).padStart(2, '0');
+      return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    };
+    const REP_FILTERS = [
+      ['all', 'الكل'],
+      ['ordered', 'طلبوا فواتير'],
+      ['notOrdered', 'ما طلبوا'],
+      ['statementSent', 'انرسل لهم كشف'],
+      ['statementNotSent', 'ما انرسل لهم كشف'],
+      ['returns', 'عندهم مرتجعات'],
+      ['problems', 'فيها مشاكل'],
+      ['unknown', 'غير موجودين في القائمة']
+    ];
+    const repMatches = (r, f) => ({
+      all: true,
+      ordered: r.invoices > 0,
+      notOrdered: r.known && r.invoices === 0,
+      statementSent: r.statementsSent > 0,
+      statementNotSent: r.known && r.statementsSent === 0,
+      returns: r.returns > 0,
+      problems: r.problems > 0,
+      unknown: !r.known
+    })[f];
+
+    async function loadReports() {
+      const fromEl = document.getElementById('rep-from');
+      const toEl = document.getElementById('rep-to');
+      const qs = new URLSearchParams();
+      if (fromEl.value) qs.set('from', fromEl.value);
+      if (toEl.value) qs.set('to', toEl.value);
+      const myRequest = ++reportRequestSeq; // لو تغيّر التاريخ بسرعة، يُعرض آخر طلب فقط
+      let data;
+      try {
+        const res = await fetch('api/reports' + (qs.toString() ? `?${qs}` : ''));
+        data = await res.json();
+        if (!data || !Array.isArray(data.rows)) throw new Error(data && data.message || 'تعذر تحميل التقرير');
+      } catch (e) { if (myRequest === reportRequestSeq) document.getElementById('rep-list-info').innerText = 'تعذر تحميل التقرير'; return; }
+      if (myRequest !== reportRequestSeq) return;
+      reportData = data;
+      // الفترة الفعلية (الافتراضي: من أول الشهر لليوم)
+      fromEl.value = reportData.from;
+      toEl.value = reportData.to;
+      const info = document.getElementById('rep-list-info');
+      info.innerText = (reportData.warning ? '⚠ ' + reportData.warning + ' — ' : '') + (reportData.customersCount
+        ? `قائمة العملاء: ${reportData.customersCount} عميل${reportData.importedAt ? ' — آخر تحديث ' + fmtDate(reportData.importedAt) : ''}`
+        : 'ما فيه قائمة عملاء — اضغط "تحديث قائمة العملاء" واختر الملف');
+      info.style.color = reportData.warning ? 'var(--danger)' : '';
+      renderReports();
+    }
+
+    let reportRequestSeq = 0;
+    // البحث يقبل الأرقام العربية (١٠٩٤) والإنجليزية
+    const latinDigits = (v) => String(v || '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+
+    function setReportFilter(f) { reportFilter = f; renderReports(); }
+
+    const dayLabel = (d) => { const [y, m, dd] = String(d).split('-'); return `${dd}/${m}/${y}`; };
+    const periodLabel = () => reportData ? `من ${dayLabel(reportData.from)} إلى ${dayLabel(reportData.to)}` : '';
+
+    function filteredReportRows() {
+      if (!reportData) return [];
+      const q = latinDigits(document.getElementById('rep-search').value).replace(/\D/g, '');
+      const rows = reportData.rows.filter(r => repMatches(r, reportFilter));
+      if (!q) return rows;
+      // رقم عميل كامل (مثل 0004) => هذا العميل بس. جزء من رقم (مثل 4) => كل رقم فيه هذا الجزء.
+      const noZeros = (v) => String(v).replace(/^0+(?=\d)/, '');
+      const exact = rows.filter(r => String(r.number) === q || (q.startsWith('0') && noZeros(r.number) === noZeros(q)));
+      if (exact.length) return exact;
+      return q.startsWith('0') ? [] : rows.filter(r => String(r.number).includes(q));
+    }
+
+    function renderReports() {
+      if (!reportData) return;
+      const base = reportData.rows;
+      const known = base.filter(r => r.known);
+      const cards = [
+        ['all', known.length, 'عميل في القائمة', ''],
+        ['ordered', known.filter(r => r.invoices > 0).length, 'طلبوا فواتير في الفترة', 'good'],
+        ['notOrdered', known.filter(r => r.invoices === 0).length, 'ما طلبوا في الفترة', 'bad'],
+        ['statementSent', known.filter(r => r.statementsSent > 0).length, 'انرسل لهم كشف حساب', 'good'],
+        ['statementNotSent', known.filter(r => r.statementsSent === 0).length, 'ما انرسل لهم كشف', 'warn']
+      ];
+      document.getElementById('rep-cards').innerHTML = cards.map(([f, n, t, cls]) =>
+        `<div class="rep-card ${cls} ${reportFilter === f ? 'active' : ''}" onclick="setReportFilter('${f}')"><div class="n">${n}</div><div class="t">${t}</div></div>`).join('');
+      document.getElementById('rep-filters').innerHTML = REP_FILTERS.map(([f, t]) => {
+        const n = base.filter(r => repMatches(r, f)).length;
+        return `<button class="rep-pill ${reportFilter === f ? 'active' : ''}" onclick="setReportFilter('${f}')">${t} (${n})</button>`;
+      }).join('');
+
+      const rows = filteredReportRows();
+      const z = (n) => n ? n : '<span class="rep-zero">0</span>';
+      document.getElementById('rep-tbody').innerHTML = rows.length ? rows.map(r => `
+        <tr onclick="openCustomerModal('${repEsc(r.number)}')">
+          <td><span class="rep-num">${repEsc(r.number)}</span>${r.known ? '' : ' <span class="rep-tag review">مو في القائمة</span>'}</td>
+          <td>${r.invoices ? `<span class="rep-yes">${r.invoices}</span>` : z(0)}</td>
+          <td>${z(r.returns)}</td>
+          <td>${r.statementsSent ? `<span class="rep-yes">انرسل ✓</span>` : (r.statements ? '<span class="rep-no">ما انرسل</span>' : '<span class="rep-zero">—</span>')}</td>
+          <td>${r.problems ? `<span class="rep-no">${r.problems}</span>` : z(0)}</td>
+        </tr>`).join('') : '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">ما فيه عملاء في هذا العرض</td></tr>';
+      document.getElementById('rep-count-line').innerText = `${rows.length} عميل — ${periodLabel()} — مستندات الفترة: ${reportData.summary.documents} (انرسل ${reportData.summary.sent}، مشاكل ${reportData.summary.problems})`;
+    }
+
+    const STATUS_LABEL = { sent: ['انرسل ✓', 'sent'], review: ['ما انرسل (مراجعة)', 'review'], cash: ['نقدي — ما انرسل', 'cash'], stopped: ['موقوف — ما انرسل', 'stopped'] };
+
+    async function openCustomerModal(number) {
+      let d;
+      try { d = await (await fetch(`api/reports/customer?number=${encodeURIComponent(number)}`)).json(); } catch (e) { return; }
+      document.getElementById('rep-modal-title').innerText = `العميل ${number}`;
+      document.getElementById('rep-modal-sub').innerText = [
+        d.info ? '' : 'غير موجود في قائمة العملاء',
+        `كل المستندات: ${d.history.length}`
+      ].filter(Boolean).join(' — ');
+      document.getElementById('rep-modal-tbody').innerHTML = d.history.length ? d.history.map(h => {
+        const [label, cls] = STATUS_LABEL[h.status] || [h.status, ''];
+        return `<tr style="cursor:default;">
+          <td>${fmtDate(h.at)}</td>
+          <td>${repEsc(h.typeLabel)}</td>
+          <td><span class="rep-tag ${cls}">${label}</span></td>
+          <td>${repEsc(h.group || '-')}</td>
+          <td>${repEsc(h.device || '-')}</td>
+          <td style="white-space:normal; max-width:260px; color:var(--text-muted); font-size:0.78rem;">${h.status === 'sent' ? '' : repEsc(h.reason || '')}</td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:20px;">ما فيه مستندات لهذا العميل بعد</td></tr>';
+      document.getElementById('rep-modal').classList.add('active');
+    }
+
+    function closeCustomerModal() { document.getElementById('rep-modal').classList.remove('active'); }
+
+    /** تصدير العملاء الظاهرين الآن فقط (حسب الفلتر والبحث والفترة) كملف Excel حقيقي */
+    async function exportReportExcel() {
+      if (!reportData) return;
+      const rows = filteredReportRows();
+      const f = REP_FILTERS.find(x => x[0] === reportFilter);
+      const filterName = f ? f[1] : 'الكل';
+      const search = document.getElementById('rep-search').value.trim();
+      const headers = ['رقم العميل', 'فواتير', 'فواتير انرسلت', 'مرتجعات', 'كشف حساب انرسل', 'مشاكل', 'نقدي', 'في القائمة'];
+      const data = rows.map(r => [String(r.number), r.invoices, r.invoicesSent, r.returns, r.statementsSent ? 'نعم' : 'لا', r.problems, r.cash, r.known ? 'نعم' : 'لا']);
+      const title = `تقرير العملاء — ${periodLabel()} — ${filterName}${search ? ' — بحث: ' + search : ''} (${rows.length} عميل)`;
+      try {
+        const res = await fetch('api/reports/xlsx', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sheetName: filterName, title, headers, rows: data, widths: [14, 10, 14, 10, 16, 10, 10, 12] })
+        });
+        if (!res.ok) throw new Error('تعذر إنشاء الملف');
+        const blob = await res.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `تقرير العملاء ${reportData.from} إلى ${reportData.to} - ${filterName}.xlsx`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      } catch (e) { showToastAlert('تعذر التصدير', e.message, true); }
+    }
+
+    async function importCustomerList(input) {
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file) return;
+      try {
+        const body = await file.arrayBuffer();
+        const send = async (force) => (await fetch('api/reports/import' + (force ? '?force=1' : ''), { method: 'POST', headers: { 'Content-Type': 'application/octet-stream', 'x-file-name': encodeURIComponent(file.name) }, body })).json();
+        let d = await send(false);
+        // الملف أصغر بكثير من القائمة الحالية => غالباً ملف غلط، يتأكد منك أول
+        if (!d.success && d.needsConfirm && confirm(`${d.message}.\nمتأكد تبي تستبدل القائمة؟ (القائمة القديمة تنحفظ نسخة منها)`)) d = await send(true);
+        if (d.success) { showToastAlert('تم تحديث قائمة العملاء', `${d.count} عميل من الملف ${file.name}`, false); loadReports(); }
+        else if (!d.needsConfirm) showToastAlert('تعذر تحديث القائمة', d.message || 'الملف غير مدعوم', true);
+      } catch (e) { showToastAlert('تعذر تحديث القائمة', e.message, true); }
+    }
+
+    // جلب ومتابعة حالة النظام الحية
+    async function fetchLiveSystemState() {
+      try {
+        const res = await fetch('api/status');
+        const data = await res.json();
+        renderWarehouseStatus(data.warehouse);
+
+        // تحديث شارة الهيدر
+        const badgeHeader = document.getElementById('badge-wa-header');
+        const textHeader = document.getElementById('text-wa-header');
+        const kpiWa = document.getElementById('kpi-wa-status');
+
+        // تحديث أقسام البطاقة الذكية
+        const viewConnected = document.getElementById('wa-view-connected');
+        const viewQr = document.getElementById('wa-view-qr');
+        const viewLoading = document.getElementById('wa-view-loading');
+        const qrCanvas = document.getElementById('qr-holder-canvas');
+
+        if (data.status === 'connected') {
+          badgeHeader.className = 'wa-badge-pill connected';
+          textHeader.innerText = `واتساب متصل (${data.phone || 'نشط'})`;
+          kpiWa.innerText = `متصل (${data.phone || 'نشط'})`;
+          kpiWa.style.color = '#059669';
+
+          viewConnected.style.display = 'flex';
+          viewQr.style.display = 'none';
+          viewLoading.style.display = 'none';
+
+          if (data.phone) {
+            document.getElementById('label-connected-details').innerText = `الجلسة نشطة ومربوطة بالرقم (${data.phone}). يتم مراقبة المجلد وإرسال المستندات فور حفظها دون أي تدخل بشري.`;
+          }
+        } else if (data.status === 'qr_ready') {
+          badgeHeader.className = 'wa-badge-pill waiting';
+          textHeader.innerText = 'بانتظار مسح الرمز (QR)';
+          kpiWa.innerText = 'بانتظار مسح الرمز';
+          kpiWa.style.color = '#d97706';
+
+          viewConnected.style.display = 'none';
+          viewQr.style.display = 'flex';
+          viewLoading.style.display = 'none';
+
+          if (data.qrSvg) {
+            qrCanvas.innerHTML = data.qrSvg;
+          }
+        } else if (data.status === 'reconnecting') {
+          badgeHeader.className = 'wa-badge-pill reconnecting';
+          textHeader.innerText = 'جاري إعادة الاتصال...';
+          kpiWa.innerText = 'إعادة اتصال...';
+          kpiWa.style.color = '#2563eb';
+
+          viewConnected.style.display = 'none';
+          viewQr.style.display = 'none';
+          viewLoading.style.display = 'block';
+          document.getElementById('text-loading-status').innerText = 'جاري إعادة الاتصال بالواتساب تلقائياً...';
+        } else if (data.status === 'failed') {
+          badgeHeader.className = 'wa-badge-pill waiting';
+          textHeader.innerText = 'واتساب غير متصل ⚠';
+          kpiWa.innerText = 'غير متصل — يحتاج تدخل';
+          kpiWa.style.color = '#dc2626';
+
+          viewConnected.style.display = 'none';
+          viewQr.style.display = 'none';
+          viewLoading.style.display = 'block';
+          document.getElementById('text-loading-status').innerText = '⚠ تعذر الاتصال بواتساب بعد عدة محاولات. تأكد من الإنترنت — البرنامج يعيد المحاولة تلقائياً كل دقيقتين، والمستندات تنتظر ولن تضيع. إذا استمرت المشكلة اضغط "ربط جهاز جديد" بالأسفل وامسح الباركود من جديد.';
+        } else {
+          badgeHeader.className = 'wa-badge-pill waiting';
+          textHeader.innerText = 'جاري التهيئة...';
+          kpiWa.innerText = 'جاري التهيئة...';
+          kpiWa.style.color = '#d97706';
+
+          viewConnected.style.display = 'none';
+          viewQr.style.display = 'none';
+          viewLoading.style.display = 'block';
+          if (data.loadingPercent) {
+            document.getElementById('text-loading-status').innerText = `جاري مزامنة واتساب مع الهاتف (${data.loadingPercent}%)...`;
+          } else {
+            document.getElementById('text-loading-status').innerText = 'جاري تهيئة خدمة الواتساب واستعادة الجلسة فائق السرعة...';
+          }
+        }
+
+        // تحديث العدادات الإحصائية
+        if (data.stats) {
+          document.getElementById('kpi-sent-count').innerText = data.stats.sent || 0;
+          document.getElementById('kpi-review-count').innerText = data.stats.review || 0;
+          document.getElementById('kpi-customers-count').innerText = data.stats.customersCount || 0;
+        }
+
+        // تحديث سجلات المستندات مع استبعاد العناصر المخفاة
+        let newLogs = data.recentLogs || [];
+        let dismissedFiles = [];
+        try {
+          dismissedFiles = JSON.parse(localStorage.getItem('alwady_dismissed_files') || '[]');
+        } catch (_) { }
+
+        newLogs = newLogs.filter(l => !dismissedFiles.includes(l.fileName));
+
+        internalLogCache = newLogs;
+        renderStreamItems();
+        evaluateFailedAlerts();
+
+      } catch (err) {
+        console.error('Error fetching state:', err);
+      }
+    }
+
+    function evaluateFailedAlerts() {
+      const banner = document.getElementById('banner-failed-alert');
+      if (!banner) return;
+      const textDetails = document.getElementById('text-failed-alert-details');
+      const failedLogs = internalLogCache.filter(l => l.status === 'review');
+
+      if (failedLogs.length > 0) {
+        banner.classList.add('active');
+        if (textDetails) {
+          textDetails.innerText = `يوجد (${failedLogs.length}) مستندات متعثرة لم يتم إرسالها. آخر سبب: ${failedLogs[0].reason || ''}`;
+        }
+      } else {
+        banner.classList.remove('active');
+      }
+    }
+
+    function applyStreamFilter(filter) {
+      activeStreamFilter = filter;
+      document.querySelectorAll('.filter-pill').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`filter-btn-${filter}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      renderStreamItems();
+    }
+
+    // عرض عناصر سجل المستندات الفوري
+    function renderStreamItems() {
+      const container = document.getElementById('container-documents-stream');
+      let items = internalLogCache;
+
+      if (activeStreamFilter === 'sent') {
+        items = items.filter(l => l.status === 'sent');
+      } else if (activeStreamFilter === 'review') {
+        items = items.filter(l => l.status === 'review');
+      }
+
+      if (!items || items.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 48px 20px; color: var(--text-muted); background: var(--surface-subtle); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 12px; color: var(--text-light);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <p style="font-weight: 700;">لا توجد سجلات مستندات في هذا العرض حالياً.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      items.forEach(log => {
+        const isSent = log.status === 'sent';
+        const isSkipped = log.status === 'skipped';
+        const isProcessing = log.status === 'processing';
+        const cardClass = isSent ? 'is-sent' : ((isProcessing || isSkipped) ? 'is-processing' : 'is-failed');
+
+        let categoryClass = 'type-invoice';
+        let categoryName = log.docTypeLabel || 'فاتورة مبيعات';
+        if (log.docTypeClass === 'clearance') {
+          categoryClass = 'type-clearance';
+        } else if (log.docTypeClass === 'return') {
+          categoryClass = 'type-return';
+        } else if (log.docTypeClass === 'statement') {
+          categoryClass = 'type-statement';
+        }
+
+        const safePath = (log.filePath || '').replace(/\\/g, '/');
+        const encName = encArg(log.fileName || '');
+        const encPath = encArg(safePath);
+
+        html += `
+          <div class="doc-row-card ${cardClass}" id="card-log-${safeText(log.id)}">
+            <div class="doc-meta-right">
+              <span class="doc-type-badge ${categoryClass}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                <span>${safeText(categoryName)}</span>
+              </span>
+
+              <div class="doc-main-info">
+                <div class="doc-file-title">
+                  <span>${safeText(log.fileName)}</span>
+                  ${log.filePath ? `
+                  <button class="btn-action-sm" onclick="openPdfPreviewModal('${encName}', '${encPath}')" style="padding:2px 8px; font-size:0.75rem;" title="معاينة الملف">
+                    👁 معاينة
+                  </button>
+                  <button class="btn-action-sm local-only" onclick="triggerShowInFolder('${encName}', '${encPath}')" style="padding:2px 8px; font-size:0.75rem;" title="إظهار في مجلد ويندوز">
+                    📁 المجلد
+                  </button>` : ''}
+                </div>
+                <div class="doc-secondary-meta">
+                  <span class="meta-tag">العميل: <strong>${safeText(log.customerNumber || '-')}</strong></span>
+                  <span class="meta-tag">الوجهة: <strong>${safeText(log.phone || '-')}</strong></span>
+                  <span class="meta-tag">الوقت: <strong>${safeText(log.time || '')}</strong></span>
+                  <span class="meta-tag" style="color:${isSent ? 'var(--success)' : (isSkipped ? 'var(--text-muted)' : 'var(--danger)')};">
+                    ${isSent ? '✅ تم الإرسال' : (isSkipped ? (log.skipKind === 'cash' ? '💵 ' : '⏸ ') + safeText(log.reason || 'موقوف') : '⚠ ' + safeText(log.reason || 'تعذر الإرسال'))}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="doc-actions-left">
+              ${isSkipped ? `
+                ${(log.skipKind !== 'cash' && log.docTypeClass === 'clearance' && log.filePath) ? `
+                <button class="btn-action-sm" onclick="sendStoppedDocument('${encPath}')" title="لو البرنامج حسبه فسح بالغلط (مثلاً اسم العميل فيه كلمة فسح)">هذا مو فسح — أرسله</button>` : ''}
+                <span style="font-size:0.78rem; font-weight:800; color:var(--text-muted); background:var(--surface-subtle); padding:4px 10px; border-radius:6px; border:1px solid var(--border-color);">
+                  ${log.skipKind === 'cash' ? 'نقدي 💵' : 'موقوف ⏸'}
+                </span>
+              ` : !isSent ? `
+                <button class="btn-action-sm btn-retry-primary" onclick="triggerRetryDocument('${encName}', '${encPath}')" title="إعادة محاولة الإرسال فوراً">
+                  🔄 إعادة الإرسال
+                </button>
+                <button class="btn-action-sm" onclick="triggerDismissLog('${encArg(log.id)}', '${encName}')" title="حذف من السجل" style="color:var(--text-light);">
+                  ✕
+                </button>
+              ` : `
+                <span style="font-size:0.78rem; font-weight:800; color:var(--success); background:var(--success-light); padding:4px 10px; border-radius:6px; border:1px solid var(--success-border);">
+                  مكتمل ✓
+                </span>
+              `}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // إدارة العملاء
+
+
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+
+
+
+
+
+
+    // الإعدادات والرسائل والأجهزة المرتبطة
+    async function loadLinkedDevices() {
+      try {
+        const res = await fetch('api/devices');
+        const data = await res.json();
+        document.getElementById('devices-disabled').style.display = data.enabled ? 'none' : 'block';
+        document.getElementById('devices-panel').style.display = data.enabled ? 'block' : 'none';
+        if (!data.enabled) return;
+        document.getElementById('pairing-code').innerText = data.pairingCode || '------';
+        const list = document.getElementById('devices-list');
+        if (!data.devices || data.devices.length === 0) {
+          list.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem;">لا توجد أجهزة مرتبطة بعد.</div>';
+          return;
+        }
+        list.innerHTML = data.devices.map(d => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border:1px solid var(--border, #e2e8f0); border-radius:8px;">
+            <div>
+              <strong>🖥 ${escapeHtml(d.name)}</strong>
+              <div style="font-size:0.78rem; color:var(--text-muted);">آخر استخدام: ${d.lastSeen ? new Date(d.lastSeen).toLocaleString('ar-SA') : 'لم يرسل بعد'}</div>
+            </div>
+            <button class="btn-action-sm" style="color:var(--danger);" onclick="unlinkDevice('${encArg(d.id)}', '${encArg(d.name)}')">إلغاء الربط</button>
+          </div>`).join('');
+      } catch (e) { }
+    }
+
+    async function generateNewPairingCode() {
+      try {
+        const res = await fetch('api/devices/new-code', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) document.getElementById('pairing-code').innerText = data.pairingCode;
+      } catch (e) { }
+    }
+
+    async function unlinkDevice(encId, encName) {
+      const name = decodeURIComponent(encName);
+      if (!confirm(`إلغاء ربط الجهاز "${name}"؟ لن يستطيع إرسال مستندات حتى يُربط من جديد.`)) return;
+      try {
+        await fetch(`api/devices/${encId}`, { method: 'DELETE' });
+        showToastAlert('تم إلغاء الربط', `الجهاز "${name}" لم يعد مرتبطاً`, false);
+        loadLinkedDevices();
+      } catch (e) { }
+    }
+
+    // ===== المستودع: قروب المستودع + الربط مع موقع المستودع =====
+    function describeWarehouseSync(w) {
+      const s = (w && w.sync) || {};
+      const parts = [];
+      if (!w || !w.active) return { text: 'غير مفعّل: الفسح على وضعه السابق.', color: 'var(--text-muted)' };
+      if (!s.configured) parts.push((s.configProblem || 'الربط مع موقع المستودع غير مفعّل') + (s.pending > 0 ? ` — تنتظر الرفع: ${s.pending}` : ''));
+      else if (s.pending > 0) parts.push(`تنتظر الرفع للمستودع: ${s.pending}`);
+      else parts.push('الموقع: لا شيء ينتظر الرفع ✅');
+      if (s.configured && s.pending > 0 && s.lastError) parts.push(s.lastError);
+      if (s.rejected > 0) parts.push(`ملفات رفضها الموقع: ${s.rejected} (في مجلد warehouse-outbox\\rejected)`);
+      if (w.notify && w.notify.lastError) parts.push(`رسائل العملاء: ${w.notify.lastError}`);
+      const bad = (s.pending > 0 && s.lastError) || s.rejected > 0;
+      return { text: parts.join(' — '), color: bad ? 'var(--danger)' : 'var(--text-muted)' };
+    }
+
+    function renderWarehouseStatus(w) {
+      const d = describeWarehouseSync(w);
+      const line = document.getElementById('wh-sync-status');
+      if (line) { line.innerText = d.text; line.style.color = d.color; }
+      // تنبيه في لوحة العمليات فقط عند وجود ما ينتظر أو ما رُفض
+      const banner = document.getElementById('wh-pending-banner');
+      if (banner) {
+        const s = (w && w.sync) || {};
+        const show = !!(w && w.active && (s.pending > 0 || s.rejected > 0));
+        banner.style.display = show ? 'block' : 'none';
+        if (show) { banner.innerText = `🏬 ${d.text}`; banner.style.color = d.color; }
+      }
+    }
+
+    /** حالة رقم القروب تحت خانته: اسم القروب اللي لقيناه، أو السبب */
+    function setWarehouseNumberStatus(el, info) {
+      if (!info || !info.number) { el.innerText = ''; return; }
+      if (info.groupName) { el.innerText = '✅ القروب: ' + info.groupName; el.style.color = 'var(--success, #0b7a55)'; }
+      else { el.innerText = '⚠ ' + info.problem; el.style.color = 'var(--danger)'; }
+    }
+
+    async function loadWarehouseSettings() {
+      try {
+        const w = await (await fetch('api/warehouse')).json();
+        document.getElementById('field-wh-number').value = (w.main && w.main.number) || '';
+        setWarehouseNumberStatus(document.getElementById('wh-main-status'), w.main);
+        document.getElementById('wh-main-label').innerText = w.mainBranch
+          ? `رقم قروب مستودع فرع ${w.mainBranch} (فرع هذا الجهاز):`
+          : 'رقم قروب المستودع (فرع هذا الجهاز):';
+        // رقم لكل فرع بعيد (أسماء الفروع توصل من موقع المستودع)
+        const box = document.getElementById('wh-branch-groups');
+        box.innerHTML = '';
+        for (const b of w.branchNumbers || []) {
+          const div = document.createElement('div');
+          div.className = 'form-group';
+          const label = document.createElement('label');
+          label.textContent = `رقم قروب مستودع فرع ${b.branch}:`;
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'input-field';
+          input.dir = 'ltr';
+          input.inputMode = 'numeric';
+          input.autocomplete = 'off';
+          input.placeholder = 'مثال: 95123699';
+          input.dataset.branch = b.branch;
+          input.value = b.number || '';
+          const status = document.createElement('p');
+          status.style.cssText = 'font-size:0.8rem; margin-top:6px;';
+          setWarehouseNumberStatus(status, b);
+          div.appendChild(label);
+          div.appendChild(input);
+          div.appendChild(status);
+          box.appendChild(div);
+        }
+        const bnote = document.getElementById('wh-branches-note');
+        const noBranches = !(w.branchNumbers || []).length;
+        bnote.style.display = noBranches && w.apiKeySet ? 'block' : 'none';
+        bnote.innerText = 'الفروع الثانية تظهر هنا تلقائياً لما تضيف أجهزتها في موقع المستودع (صفحة "أجهزة الفروع"). فسح الفرع اللي ما له رقم يروح للموقع بس.';
+        document.getElementById('field-wh-url').value = w.siteUrl || '';
+        const key = document.getElementById('field-wh-key');
+        key.value = '';
+        key.placeholder = w.apiKeySet ? 'محفوظ — اتركه فاضي إذا ما تبي تغيّره' : 'الصق المفتاح هنا';
+        renderWarehouseStatus(w);
+      } catch (e) { }
+    }
+
+    async function submitWarehouseSettings() {
+      const branchNumbers = {};
+      document.querySelectorAll('#wh-branch-groups input[data-branch]').forEach(s => { branchNumbers[s.dataset.branch] = s.value; });
+      const warehouse = {
+        number: document.getElementById('field-wh-number').value,
+        branchNumbers,
+        siteUrl: document.getElementById('field-wh-url').value,
+        apiKey: document.getElementById('field-wh-key').value
+      };
+      try {
+        const res = await fetch('api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ warehouse })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToastAlert('تم الحفظ بنجاح', 'تم تحديث إعدادات المستودع', false);
+          loadWarehouseSettings();
+        } else {
+          showToastAlert('لم يتم الحفظ', data.message || 'تعذر حفظ إعدادات المستودع', true);
+        }
+      } catch (e) {
+        alert('فشل الحفظ: ' + e.message);
+      }
+    }
+
+    async function populateSettingsInputs() {
+      loadLinkedDevices();
+      loadWarehouseSettings();
+      try {
+        const res = await fetch('api/settings');
+        const settings = await res.json();
+        const caps = settings.captions || {};
+        const defs = settings.defaultCaptions || {};
+        for (const k of ['invoice', 'clearance', 'return', 'statement']) {
+          const el = document.getElementById(`field-cap-${k}`);
+          el.value = caps[k] || '';
+          // الخانة الفاضية تُرسل بالنص الأصلي: يظهر بالرمادي حتى يكون واضحاً
+          el.placeholder = defs[k] ? `${defs[k]}  (النص الأصلي)` : '';
+          const send = document.getElementById(`field-send-${k}`);
+          if (send) send.checked = !(settings.sendDocTypes && settings.sendDocTypes[k] === false);
+        }
+        if (settings.delayMs !== undefined && document.getElementById('field-delay-sec')) {
+          document.getElementById('field-delay-sec').value = Math.round((settings.delayMs || 5000) / 1000);
+        }
+      } catch (e) { }
+    }
+
+    async function shutdownApp() {
+      if (!confirm('إيقاف البرنامج؟ لن تُرسل أي مستندات حتى تشغّله من جديد من اختصار سطح المكتب.')) return;
+      try { await fetch('api/shutdown', { method: 'POST' }); } catch (e) { }
+      document.body.innerHTML = '<div style="font-family:inherit; text-align:center; padding:80px 20px; direction:rtl;"><h2>تم إيقاف البرنامج</h2><p>لتشغيله مرة أخرى: اختصار "نظام إرسال المستندات" على سطح المكتب.</p></div>';
+    }
+
+
+    async function submitGeneralSettings() {
+      const delaySec = Number(document.getElementById('field-delay-sec').value) || 5;
+      const delayMs = Math.max(1000, delaySec * 1000);
+
+      try {
+        const res = await fetch('api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ delayMs })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToastAlert('تم الحفظ بنجاح', 'تم تحديث مهلة التأخير بين المستندات', false);
+        }
+      } catch (e) {
+        alert('فشل الحفظ: ' + e.message);
+      }
+    }
+
+    async function submitCaptionsUpdate() {
+      const invoice = document.getElementById('field-cap-invoice').value;
+      const clearance = document.getElementById('field-cap-clearance').value;
+      const ret = document.getElementById('field-cap-return').value;
+      const statement = document.getElementById('field-cap-statement').value;
+
+      try {
+        const res = await fetch('api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            captions: { invoice, clearance, return: ret, statement },
+            sendDocTypes: Object.fromEntries(['invoice', 'clearance', 'return', 'statement'].map(k => [k, document.getElementById(`field-send-${k}`).checked]))
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToastAlert('تم الحفظ بنجاح', 'تم تحديث نصوص الرسائل وأنواع المستندات المرسلة', false);
+        }
+      } catch (e) {
+        alert('فشل الحفظ: ' + e.message);
+      }
+    }
+
+
+    // إعادة ضبط جلسة واتساب وتوليد باركود جديد
+    async function triggerResetWhatsApp() {
+      showToastAlert('جاري التجهيز...', 'يتم مسح الجلسة القديمة وتوليد باركود جديد للمسح، ثوانٍ معدودة...', false);
+      const textLoading = document.getElementById('text-loading-status');
+      if (textLoading) textLoading.innerText = 'جاري مسح الجلسة القديمة وتجهيز باركود جديد...';
+      try {
+        await fetch('api/reset-whatsapp', { method: 'POST' });
+        setTimeout(() => fetchLiveSystemState(), 1200);
+      } catch (e) {
+        showToastAlert('تنبيه', 'تعذر إرسال الطلب، تأكد من تشغيل البرنامج.', true);
+      }
+    }
+
+    // إجراءات الملفات والتنبيهات
+    async function triggerOpenRootFolder() {
+      try {
+        await fetch('api/open-folder', { method: 'POST' });
+      } catch (e) { }
+    }
+
+    async function triggerShowInFolder(encName, encPath) {
+      try {
+        await fetch('api/select-file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName: decodeURIComponent(encName), filePath: decodeURIComponent(encPath) })
+        });
+      } catch (e) { }
+    }
+
+    async function triggerOpenExternalFile(encName, encPath) {
+      try {
+        await fetch('api/open-file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName: decodeURIComponent(encName), filePath: decodeURIComponent(encPath) })
+        });
+      } catch (e) { }
+    }
+
+    const retryInProgress = new Set();
+    async function triggerRetryDocument(encName, encPath, overrideCustomer = null) {
+      const fileName = decodeURIComponent(encName);
+      const filePath = decodeURIComponent(encPath);
+      if (retryInProgress.has(fileName)) {
+        showToastAlert('انتظر', `المستند [${fileName}] قيد الإرسال الآن`, false);
+        return;
+      }
+      retryInProgress.add(fileName);
+      setTimeout(() => retryInProgress.delete(fileName), 90000);
+      showToastAlert('جاري إعادة الإرسال...', `جاري محاولة إرسال [${fileName}] عبر واتساب`, false);
+
+      try {
+        const res = await fetch('api/retry-invoice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName, filePath, overrideCustomerNumber: overrideCustomer })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToastAlert('تم الإرسال بنجاح', `تم إرسال [${fileName}] للعميل ومزامنة الأرشيف`, false);
+          fetchLiveSystemState();
+        } else {
+          if (data.uniqueNumbers && data.uniqueNumbers.length > 1) {
+            showConflictResolverModal(fileName, filePath, data.uniqueNumbers);
+          } else {
+            showToastAlert('تعذر الإرسال', data.reason || data.message || 'فشل الإرسال', true);
+          }
+          fetchLiveSystemState();
+        }
+      } catch (e) {
+        showToastAlert('خطأ في الاتصال', e.message, true);
+      } finally {
+        retryInProgress.delete(fileName);
+      }
+    }
+
+
+    async function triggerDismissLog(logId, encName) {
+      const fileName = decodeURIComponent(encName);
+      // حذف فوري من واجهة المستخدم
+      internalLogCache = internalLogCache.filter(l => l.id !== logId && l.fileName !== fileName);
+      renderStreamItems();
+      evaluateFailedAlerts();
+
+      // حفظ الملف المخفي محلياً لمنع ظهوره
+      try {
+        const dismissedItems = JSON.parse(localStorage.getItem('alwady_dismissed_files') || '[]');
+        if (!dismissedItems.includes(fileName)) {
+          dismissedItems.push(fileName);
+          localStorage.setItem('alwady_dismissed_files', JSON.stringify(dismissedItems));
+        }
+      } catch (_) { }
+
+      try {
+        await fetch('api/dismiss-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: logId, logId, fileName })
+        });
+      } catch (e) { }
+    }
+
+    async function triggerDismissAllFailed() {
+      // 1. تجميع كل الملفات المتعثرة الحالية وإضافتها لقائمة المخفيات
+      const failedLogs = internalLogCache.filter(l => l.status === 'review');
+      try {
+        const dismissedItems = JSON.parse(localStorage.getItem('alwady_dismissed_files') || '[]');
+        failedLogs.forEach(l => {
+          if (!dismissedItems.includes(l.fileName)) dismissedItems.push(l.fileName);
+        });
+        localStorage.setItem('alwady_dismissed_files', JSON.stringify(dismissedItems));
+      } catch (_) { }
+
+      // 2. إخفاء الشريط الأحمر فوراً
+      const banner = document.getElementById('banner-failed-alert');
+      if (banner) banner.classList.remove('active');
+
+      // 3. تصفية القائمة والكاش اللحظي
+      internalLogCache = internalLogCache.filter(l => l.status !== 'review');
+      renderStreamItems();
+
+      // 4. تصفير العداد الإحصائي للمتعثرات
+      const kpiReview = document.getElementById('kpi-review-count');
+      if (kpiReview) kpiReview.innerText = '0';
+
+      // 5. إشعار منبثق للمستخدم
+      showToastAlert('تم الإخفاء', 'تم إخفاء المستندات المتعثرة الحالية بنجاح.', false);
+
+      // 6. إبلاغ الخادم لحفظ الإخفاء نهائياً في ملف processed_history.json
+      try {
+        await fetch('api/dismiss-failed', { method: 'POST' });
+      } catch (e) { }
+    }
+
+    function showConflictResolverModal(fileName, filePath, numbers) {
+      const container = document.getElementById('container-conflict-options');
+      let html = '';
+      numbers.forEach(num => {
+        html += `
+          <button class="btn-action-sm btn-retry-primary" style="padding:10px 14px; font-size:0.9rem;" onclick="hideConflictModal(); triggerRetryDocument('${encArg(fileName)}', '${encArg(filePath)}', '${String(num).replace(/[^0-9]/g, '')}')">
+            إرسال للعميل رقم: <strong>${safeText(num)}</strong>
+          </button>
+        `;
+      });
+      container.innerHTML = html;
+      document.getElementById('modal-conflict-resolver').classList.add('active');
+    }
+
+    function hideConflictModal() {
+      document.getElementById('modal-conflict-resolver').classList.remove('active');
+    }
+
+    // معاينة الـ PDF المدمجة
+    let currentPreviewPdfDoc = null;
+    let currentPdfScale = 1.0;
+    let currentPreviewFileName = '';
+    let currentPreviewFilePath = '';
+
+    async function openPdfPreviewModal(encName, encPath) {
+      currentPreviewFileName = decodeURIComponent(encName);
+      currentPreviewFilePath = decodeURIComponent(encPath);
+      document.getElementById('modal-pdf-title').innerText = `معاينة المستند: ${currentPreviewFileName}`;
+      document.getElementById('modal-pdf-preview').classList.add('active');
+
+      const container = document.getElementById('pdf-canvas-container');
+      container.innerHTML = '<div style="color:#ffffff; font-weight:700; padding:40px;">جاري تحميل صفحات المستند بدقة عالية...</div>';
+
+      try {
+        let pdfLoaded = false;
+        if (window.pdfjsLib) {
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
+          // محاولة التحميل المقاومة لبرامج التنزيل (IDM) عبر Base64
+          try {
+            const dataRes = await fetch(`api/document-data?file=${encodeURIComponent(currentPreviewFileName)}&path=${encodeURIComponent(currentPreviewFilePath)}`);
+            const dataJson = await dataRes.json();
+            if (dataJson.success && dataJson.base64) {
+              const bin = atob(dataJson.base64);
+              const bytes = new Uint8Array(bin.length);
+              for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+              const loadingTask = pdfjsLib.getDocument({ data: bytes });
+              currentPreviewPdfDoc = await loadingTask.promise;
+              currentPdfScale = 1.0;
+              document.getElementById('label-pdf-zoom').innerText = '100%';
+              renderPdfPages(currentPreviewPdfDoc, currentPdfScale);
+              pdfLoaded = true;
+            }
+          } catch (_) { }
+        }
+
+        if (!pdfLoaded) {
+          const url = `api/document-pdf?name=${encodeURIComponent(currentPreviewFileName)}&path=${encodeURIComponent(currentPreviewFilePath)}`;
+          if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
+            const loadingTask = pdfjsLib.getDocument(url);
+            currentPreviewPdfDoc = await loadingTask.promise;
+            currentPdfScale = 1.0;
+            document.getElementById('label-pdf-zoom').innerText = '100%';
+            renderPdfPages(currentPreviewPdfDoc, currentPdfScale);
+          } else {
+            container.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none; border-radius:6px; background:#fff;"></iframe>`;
+          }
+        }
+      } catch (err) {
+        container.innerHTML = `<div style="color:#f87171; font-weight:700; padding:30px;">تعذر فتح المعاينة المدمجة: ${safeText(err.message)}</div>`;
+      }
+    }
+
+    async function renderPdfPages(pdf, scale) {
+      const container = document.getElementById('pdf-canvas-container');
+      container.innerHTML = '';
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        canvas.className = 'pdf-page-canvas';
+        canvas.style.boxShadow = '0 6px 18px rgba(0,0,0,0.35)';
+        canvas.style.borderRadius = '4px';
+        canvas.style.maxWidth = '100%';
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        const renderContext = {
+          canvasContext: canvas.getContext('2d'),
+          viewport: viewport
+        };
+        await page.render(renderContext).promise;
+        container.appendChild(canvas);
+      }
+    }
+
+    function changePdfZoom(delta) {
+      if (!currentPreviewPdfDoc) return;
+      currentPdfScale = Math.max(0.6, Math.min(2.5, currentPdfScale + delta));
+      document.getElementById('label-pdf-zoom').innerText = `${Math.round(currentPdfScale * 100)}%`;
+      renderPdfPages(currentPreviewPdfDoc, currentPdfScale);
+    }
+
+    function closePdfPreviewModal() {
+      document.getElementById('modal-pdf-preview').classList.remove('active');
+      currentPreviewPdfDoc = null;
+    }
+
+    function showToastAlert(title, message, isError = false) {
+      const container = document.getElementById('toast-alerts-container');
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        background: #ffffff;
+        border: 1px solid ${isError ? 'var(--danger-border)' : 'var(--success-border)'};
+        border-right: 5px solid ${isError ? 'var(--danger)' : 'var(--success)'};
+        border-radius: var(--radius-sm);
+        padding: 12px 16px;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
+        pointer-events: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        animation: fadeIn 0.2s ease-out;
+      `;
+      toast.innerHTML = `
+        <strong style="font-size:0.88rem; color:${isError ? 'var(--danger)' : 'var(--success)'};">${safeText(title)}</strong>
+        <span style="font-size:0.8rem; color:var(--text-muted);">${safeText(message)}</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 4500);
+    }
+
+    // الاستماع لأحداث البث اللحظي الفوري عبر Server-Sent Events (SSE)
+    function initRealtimeEvents() {
+      try {
+        const eventSource = new EventSource('api/events');
+
+        eventSource.addEventListener('log_entry', (e) => {
+          try {
+            const entry = JSON.parse(e.data);
+            internalLogCache.unshift(entry);
+            if (internalLogCache.length > 200) internalLogCache.pop();
+            renderStreamItems();
+            evaluateFailedAlerts();
+
+            if (entry.status === 'skipped' && entry.skipKind === 'cash') {
+              showToastAlert('💵 فاتورة نقدي — ما انرسلت', `${entry.docTypeLabel || 'مستند'} للعميل [${entry.customerNumber}] تحتاج طباعة يدوية (فوق في لوحة العمليات)`, false);
+              loadCashPending();
+            } else if (entry.status === 'review') {
+              showToastAlert('⚠ مستند متعثر!', `[${entry.fileName}] تعذر إرساله: ${entry.reason}`, true);
+            } else if (entry.status === 'sent') {
+              showToastAlert('✅ تم الإرسال بنجاح', `تم إرسال [${entry.fileName}] إلى العميل [${entry.customerNumber}]`, false);
+            }
+          } catch (_) { }
+        });
+
+        eventSource.addEventListener('cash_pending', () => loadCashPending());
+
+        eventSource.addEventListener('wa_status', (e) => {
+          fetchLiveSystemState();
+        });
+
+        eventSource.addEventListener('customers_updated', () => {
+          fetchLiveSystemState();
+        });
+
+        eventSource.onerror = () => {
+          // محاولة استعادة الاتصال تلقائياً
+        };
+      } catch (_) { }
+    }
+
+    // التشغيل عند تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        localStorage.removeItem('alwady_failed_alert_dismissed');
+      } catch (_) { }
+      fetchLiveSystemState();
+      setInterval(fetchLiveSystemState, 4000);
+      initRealtimeEvents();
+      // فواتير نقدي تنتظر الطباعة (من المجلد، فتبقى ظاهرة حتى بعد إعادة التشغيل)
+      loadCashPending();
+      setInterval(loadCashPending, 30000);
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,147 @@
+<%- include('partials/head', { nav: 'whatsapp', wide: true }) %>
+<%- include('partials/wa-tabs') %>
+<%
+  function enc(v) { return encodeURIComponent(String(v == null ? '' : v)); }
+  function viewHref(l) { return '/admin/whatsapp/view?file=' + enc(l.fileName) + '&path=' + enc(String(l.filePath || '').replace(/\\/g, '/')); }
+  var TYPE_TONE = { clearance: 'tone-gold', return: 'tone-preparing', statement: 'tone-received', invoice: 'tone-handed' };
+%>
+
+<div class="dash-grid wa-top" id="wa-live" data-logs-key="<%= logsKey %>" data-status="<%= reachable ? (wa.status || 'waiting') : 'down' %>">
+  <%# ---------- اتصال واتساب ---------- %>
+  <section class="card wa-conn wa-<%= waState.tone %>">
+    <div class="card-title"><span class="card-icon <%= waState.tone === 'ok' ? 'tone-success' : waState.tone === 'bad' ? 'tone-danger' : 'tone-gold' %>"><%- icon('send') %></span><h2>اتصال واتساب الشركة</h2></div>
+    <% if (!reachable) { %>
+      <p class="wa-state-line"><strong>نظام الإرسال يعيد التشغيل…</strong></p>
+    <% } else { %>
+      <p class="wa-state-line"><strong id="wa-label"><%= waState.label %></strong><% if (wa.phone) { %> · <span dir="ltr"><%= wa.phone %></span><% } %></p>
+      <% if (wa.status !== 'connected') { %><p class="card-sub" id="wa-text"><%= waState.text %></p><% } %>
+      <div class="wa-qr" id="wa-qr"<%- wa.status === 'qr_ready' && wa.qrSvg ? '' : ' hidden' %>>
+        <div class="wa-qr-img" id="wa-qr-img"><%- wa.status === 'qr_ready' ? (wa.qrSvg || '') : '' %></div>
+        <ol class="wa-steps">
+          <li>افتح واتساب في جوال الشركة</li>
+          <li>الإعدادات ← <strong>الأجهزة المرتبطة</strong> ← <strong>ربط جهاز</strong></li>
+          <li>وجّه الكاميرا على الباركود — يتصل خلال ثواني</li>
+        </ol>
+      </div>
+      <form method="post" action="/admin/whatsapp/reset" class="wa-reset" data-once data-confirm="<%= wa.status === 'connected' ? 'هذا يفصل واتساب الشركة عن النظام، والإرسال يوقف لين تمسح الباركود من جديد. متأكد؟' : 'طلب باركود جديد؟' %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" class="btn btn-ghost btn-small"><%- icon('refresh') %> <%= wa.status === 'connected' ? 'فصل واتساب وربط جوال ثاني' : 'باركود جديد' %></button>
+      </form>
+    <% } %>
+  </section>
+
+  <%# ---------- الأرقام ---------- %>
+  <section class="card">
+    <div class="card-title"><span class="card-icon"><%- icon('chart') %></span><h2>من آخر تشغيل لنظام الإرسال</h2></div>
+    <div class="kpis kpis-3">
+      <div class="kpi"><span class="kpi-label">انرسلت</span><span class="kpi-value"><%= counts.sent %></span></div>
+      <div class="kpi"><span class="kpi-label">تحتاج مراجعة</span><span class="kpi-value<%= counts.review ? ' text-danger' : '' %>"><%= counts.review %></span></div>
+      <div class="kpi"><span class="kpi-label">قروبات العملاء الجاهزة</span><span class="kpi-value"><%= (wa.stats && wa.stats.customersCount) || 0 %></span></div>
+    </div>
+    <% if (wa.warehouse && wa.warehouse.sync && wa.warehouse.sync.pending) { %>
+      <p class="card-sub card-sub-end text-warn"><%= wa.warehouse.sync.pending %> فسح ينتظر يوصل لصفحة الفسوحات.</p>
+    <% } %>
+  </section>
+</div>
+
+<%# ---------- فواتير نقدي ---------- %>
+<% if (cash.length) { %>
+<section class="card">
+  <div class="card-title"><span class="card-icon tone-gold"><%- icon('file') %></span><h2>فواتير نقدي تنتظر الطباعة (<%= cash.length %>)</h2></div>
+  <ul class="item-list">
+    <% cash.forEach(function (c) { %>
+      <li class="waiting-row">
+        <div class="waiting-main">
+          <a class="item-link" href="<%= viewHref(c) %>"><strong><%= c.docTypeLabel %></strong><span class="muted"> · عميل نقدي <%= c.customerNumber || '' %></span></a>
+          <div class="item-meta"><%= c.fileName %></div>
+        </div>
+        <form method="post" action="/admin/whatsapp/cash-done" data-once>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="file_path" value="<%= c.filePath %>">
+          <button type="submit" class="btn btn-primary btn-small"><%- icon('check') %> تمت الطباعة</button>
+        </form>
+      </li>
+    <% }) %>
+  </ul>
+</section>
+<% } %>
+
+<%# ---------- المستندات ---------- %>
+<section class="card">
+  <div class="card-title"><span class="card-icon"><%- icon('file') %></span><h2>سجل الإرسال</h2></div>
+  <nav class="chips" aria-label="عرض">
+    <% Object.keys(shows).forEach(function (k) { %>
+      <a class="chip<%= show === k ? ' active' : '' %>" href="/admin/whatsapp?show=<%= k %>"><%= shows[k].label %> (<%= counts[k] %>)</a>
+    <% }) %>
+  </nav>
+
+  <% if (!logs.length) { %>
+    <p class="all-good"><%- icon('check') %> <%= show === 'review' ? 'ما فيه مستندات تحتاج مراجعة.' : 'ما فيه شي هنا للحين.' %></p>
+  <% } %>
+
+  <ul class="wa-logs">
+    <% logs.forEach(function (l) {
+         var isSent = l.status === 'sent', isSkipped = l.status === 'skipped', isReview = !isSent && !isSkipped && l.status !== 'processing'; %>
+      <li class="wa-log <%= isSent ? 'is-sent' : isSkipped ? 'is-skipped' : 'is-review' %>">
+        <div class="wa-log-head">
+          <span class="tag <%= TYPE_TONE[l.docTypeClass] || '' %>"><%= l.docTypeLabel || 'مستند' %></span>
+          <strong class="wa-log-file"><%= l.fileName %></strong>
+          <span class="muted small"><%= l.time || '' %></span>
+        </div>
+        <div class="wa-log-meta">
+          <span>العميل: <strong dir="ltr"><%= l.customerNumber || '—' %></strong></span>
+          <span>الوجهة: <strong><%= l.phone && l.phone !== '-' ? l.phone : '—' %></strong></span>
+        </div>
+        <div class="wa-log-status">
+          <% if (isSent) { %><span class="text-success"><%- icon('check') %> انرسل</span><% if (l.reason) { %> <span class="muted small"><%= l.reason %></span><% } %>
+          <% } else if (isSkipped) { %><span class="muted"><%= l.skipKind === 'cash' ? 'نقدي — ما انرسل' : 'موقوف — ما انرسل' %><%= l.reason ? ': ' + l.reason : '' %></span>
+          <% } else { %><span class="text-danger"><%- icon('alert') %> <%= l.reason || 'تعذر الإرسال' %></span><% } %>
+        </div>
+        <div class="wa-log-actions">
+          <% if (l.filePath) { %><a class="btn btn-ghost btn-small" href="<%= viewHref(l) %>"><%- icon('eye') %> فتح PDF</a><% } %>
+          <% if (isReview && l.filePath) { %>
+            <form method="post" action="/admin/whatsapp/retry" data-once>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="back" value="/admin/whatsapp?show=<%= show %>">
+              <input type="hidden" name="file_name" value="<%= l.fileName %>">
+              <input type="hidden" name="file_path" value="<%= l.filePath %>">
+              <button type="submit" class="btn btn-primary btn-small"><%- icon('refresh') %> إعادة الإرسال</button>
+            </form>
+            <details class="wa-override">
+              <summary class="summary-link">أرسل برقم عميل ثاني</summary>
+              <form method="post" action="/admin/whatsapp/retry" class="inline-add" data-once data-confirm="متأكد إن هذا رقم العميل الصحيح لهذا المستند؟">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="back" value="/admin/whatsapp?show=<%= show %>">
+                <input type="hidden" name="file_name" value="<%= l.fileName %>">
+                <input type="hidden" name="file_path" value="<%= l.filePath %>">
+                <label class="sr-only" for="num-<%= l.id %>">رقم العميل</label>
+                <input class="input" id="num-<%= l.id %>" name="customer_number" inputmode="numeric" dir="ltr" placeholder="رقم العميل" required pattern="[0-9]{1,12}">
+                <button type="submit" class="btn btn-primary btn-small">أرسل لهذا الرقم</button>
+                <button type="button" class="btn btn-ghost btn-small" data-cancel>إلغاء</button>
+              </form>
+            </details>
+            <form method="post" action="/admin/whatsapp/dismiss" data-once>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="back" value="/admin/whatsapp?show=<%= show %>">
+              <input type="hidden" name="id" value="<%= l.id %>">
+              <input type="hidden" name="file_name" value="<%= l.fileName %>">
+              <button type="submit" class="btn btn-ghost btn-small" title="يشيله من القائمة بدون إرسال">إخفاء</button>
+            </form>
+          <% } %>
+          <% if (isSkipped && l.skipKind !== 'cash' && l.docTypeClass === 'clearance' && l.filePath) { %>
+            <form method="post" action="/admin/whatsapp/not-clearance" data-once data-confirm="متأكد إن هذا المستند مو فسح؟ بيتفحص رقم العميل وقروبه مثل أي مستند ثم ينرسل.">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="back" value="/admin/whatsapp?show=<%= show %>">
+              <input type="hidden" name="file_name" value="<%= l.fileName %>">
+              <input type="hidden" name="file_path" value="<%= l.filePath %>">
+              <button type="submit" class="btn btn-ghost btn-small">هذا مو فسح — أرسله</button>
+            </form>
+          <% } %>
+        </div>
+      </li>
+    <% }) %>
+  </ul>
+</section>
+
+<script src="/static/js/whatsapp.js" defer></script>
+<%- include('partials/foot') %>

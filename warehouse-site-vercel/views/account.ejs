@@ -1,0 +1,39 @@
+<%- include('partials/head', { nav: 'account' }) %>
+
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>حسابي</h1>
+  </div>
+</div>
+
+<section class="card">
+  <div class="person-head">
+    <span class="avatar avatar-lg<%= user.role === 'admin' ? ' avatar-admin' : '' %>"><%= String(user.full_name || user.username).trim().charAt(0) %></span>
+    <div class="person-info">
+      <div class="person-name"><%= user.full_name %></div>
+      <div class="muted small"><span dir="ltr"><%= user.username %></span> · <%= roleLabel %></div>
+    </div>
+  </div>
+  <dl class="facts facts-top">
+    <div><dt>الاسم</dt><dd><%= user.full_name %></dd></div>
+    <div><dt>اسم المستخدم</dt><dd dir="ltr"><%= user.username %></dd></div>
+    <div><dt>الدور</dt><dd><%= roleLabel %></dd></div>
+    <% if (user.role !== 'admin') { %><div><dt>الفرع</dt><dd><%= user.branch ? 'فرع ' + user.branch : 'كل الفروع' %></dd></div><% } %>
+  </dl>
+</section>
+
+<section class="card">
+  <div class="card-title"><span class="card-icon"><%- icon('lock') %></span><h2>تغيير كلمة المرور</h2></div>
+  <form method="post" action="/account/password" class="form form-tight" data-once>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label for="current_password">كلمة المرور الحالية</label>
+    <input class="input" id="current_password" name="current_password" type="password" dir="ltr" autocomplete="current-password" required>
+    <label for="password">كلمة المرور الجديدة (8 خانات أو أكثر)</label>
+    <input class="input" id="password" name="password" type="password" dir="ltr" autocomplete="new-password" minlength="8" required>
+    <label for="password2">تأكيد كلمة المرور الجديدة</label>
+    <input class="input" id="password2" name="password2" type="password" dir="ltr" autocomplete="new-password" minlength="8" required>
+    <button type="submit" class="btn btn-primary btn-block">تغيير كلمة المرور</button>
+  </form>
+</section>
+
+<%- include('partials/foot') %>

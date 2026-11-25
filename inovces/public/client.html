@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>نظام إرسال المستندات</title>
+  <style>
+    :root { --primary: #0b1f4d; --gold: #c39a3c; --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --success: #059669; --danger: #dc2626; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Tahoma, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; width: 100%; max-width: 480px; text-align: center; }
+    img.logo { height: 52px; margin-bottom: 18px; }
+    h1 { font-size: 1.3rem; margin: 0 0 8px; }
+    p { color: var(--muted); margin: 0; line-height: 1.7; }
+    .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 18px 0 4px; }
+    .mode { border: 2px solid var(--border); border-radius: 12px; padding: 10px 8px; background: #fff; font-family: inherit; font-size: 0.92rem; font-weight: 700; color: var(--muted); cursor: pointer; margin: 0; }
+    .mode.active { border-color: var(--primary); color: var(--primary); background: #eef3ff; }
+    .mode small { display: block; font-weight: 600; font-size: 0.75rem; margin-top: 2px; }
+    .code-input { font-size: 2rem; letter-spacing: 0.3em; text-align: center; direction: ltr; width: 100%; max-width: 300px; padding: 10px; border: 2px solid var(--border); border-radius: 10px; font-weight: 800; margin-top: 18px; text-transform: uppercase; }
+    .code-input:focus, input.text:focus { outline: none; border-color: var(--primary); }
+    #site-code { font-size: 1.6rem; letter-spacing: 0.12em; max-width: 320px; }
+    button.primary { font-family: inherit; font-size: 1rem; font-weight: 700; border-radius: 10px; padding: 12px 36px; cursor: pointer; border: none; background: var(--primary); color: #fff; margin-top: 16px; }
+    button:disabled { opacity: 0.6; cursor: wait; }
+    .msg { margin-top: 14px; font-weight: 700; min-height: 1.4em; }
+    .msg.err { color: var(--danger); } .msg.ok { color: var(--success); }
+    .done-icon { font-size: 3rem; line-height: 1; margin-bottom: 12px; }
+    .printer { display: inline-block; margin-top: 10px; font-weight: 800; color: var(--text); direction: ltr; }
+    .branch { display: inline-block; margin-top: 12px; padding: 4px 14px; border-radius: 999px; background: #fbf5e6; color: #8a6418; font-weight: 800; }
+    label.lbl { display: block; text-align: right; font-weight: 700; font-size: 0.9rem; margin-top: 16px; }
+    input.text { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; direction: ltr; font-size: 0.95rem; margin-top: 6px; }
+    .hint { font-size: 0.82rem; margin-top: 8px; }
+    .link-btn { background: none; border: none; color: var(--muted); text-decoration: underline; font-family: inherit; font-size: 0.85rem; cursor: pointer; margin-top: 16px; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <!-- ربط الجهاز -->
+  <section class="card hidden" id="pair-card">
+    <img class="logo" src="/logo.png" alt="">
+    <h1>ربط الجهاز</h1>
+    <p id="pair-hint">كيف يرسل هذا الجهاز؟</p>
+
+    <div class="modes" role="tablist">
+      <button type="button" class="mode active" id="mode-site" onclick="setMode('site')">عن طريق موقع المستودع<small>كل الفروع — الطريقة المعتمدة</small></button>
+      <button type="button" class="mode" id="mode-lan" onclick="setMode('lan')">جهاز رئيسي بنفس المكتب<small>الطريقة القديمة — نفس الشبكة</small></button>
+    </div>
+
+    <!-- داخل الشبكة: رمز 6 أرقام من الجهاز الرئيسي -->
+    <div id="lan-box" class="hidden">
+      <p class="hint">اكتب رمز الربط الظاهر في الجهاز الرئيسي (الإعدادات ← الأجهزة المرتبطة).</p>
+      <input class="code-input" id="pair-code" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="------">
+      <div class="hidden" id="manual-address">
+        <label class="lbl" for="server-address">عنوان الجهاز الرئيسي (اختياري):</label>
+        <input class="text" id="server-address" placeholder="192.168.1.10">
+      </div>
+    </div>
+
+    <!-- فرع بعيد: رابط الموقع + رمز من صفحة "أجهزة الفروع" -->
+    <div id="site-box">
+      <p class="hint">من موقع المستودع: صفحة "أجهزة الفروع" ← أضف هذا الجهاز واختر فرعه (حتى أجهزة جدة) ← يطلع لك الرابط والرمز.</p>
+      <label class="lbl" for="site-url">رابط موقع المستودع</label>
+      <input class="text" id="site-url" placeholder="https://..." autocomplete="off" spellcheck="false">
+      <input class="code-input" id="site-code" maxlength="9" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX">
+    </div>
+
+    <br>
+    <button class="primary" id="btn-pair" onclick="pairDevice()">ربط</button>
+    <div class="msg" id="pair-msg"></div>
+  </section>
+
+  <!-- بعد الربط -->
+  <section class="card hidden" id="done-card">
+    <img class="logo" src="/logo.png" alt="">
+    <div class="done-icon">✅</div>
+    <h1>هذا الجهاز مربوط</h1>
+    <p id="done-via">اطبع على طابعة</p>
+    <span class="printer" id="printer-name">WhatsApp Sender</span>
+    <div><span class="branch hidden" id="branch-name"></span></div>
+  </section>
+
+  <!-- البرنامج متوقف -->
+  <section class="card hidden" id="stopped-card">
+    <h1>البرنامج متوقف</h1>
+    <p>افتحه من اختصار "إرسال المستندات" على سطح المكتب.</p>
+  </section>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const show = (id) => ['pair-card', 'done-card', 'stopped-card'].forEach(c => $(c).classList.toggle('hidden', c !== id));
+    let mode = 'site';
+
+    function setMode(m) {
+      mode = m;
+      $('mode-lan').classList.toggle('active', m === 'lan');
+      $('mode-site').classList.toggle('active', m === 'site');
+      $('lan-box').classList.toggle('hidden', m !== 'lan');
+      $('site-box').classList.toggle('hidden', m !== 'site');
+      $('pair-msg').innerText = '';
+    }
+
+    async function api(method, url, body) {
+      const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+      return r.json();
+    }
+
+    async function refresh() {
+      let s;
+      try { s = await api('GET', '/api/client/status'); } catch (e) { show('stopped-card'); return; }
+      $('printer-name').innerText = s.printerName || 'WhatsApp Sender';
+      if (!s.paired || s.unlinked) {
+        $('pair-hint').innerText = s.unlinked ? 'انتهى ربط هذا الجهاز — اربطه من جديد' : 'كيف يرسل هذا الجهاز؟';
+        if (!$('server-address').value && s.serverAddress) $('server-address').value = s.serverAddress;
+        if (!$('site-url').value && s.siteUrl) $('site-url').value = s.siteUrl;
+        if (s.unlinked && s.mode === 'site' && mode !== 'site') setMode('site');
+        show('pair-card');
+      } else {
+        $('done-via').innerText = s.mode === 'site' ? 'مربوط عن طريق موقع المستودع. اطبع على طابعة' : 'اطبع على طابعة';
+        $('branch-name').classList.toggle('hidden', !s.branch);
+        $('branch-name').innerText = s.branch ? `فرع ${s.branch}` : '';
+        show('done-card');
+      }
+    }
+
+    async function pairDevice() {
+      const msg = $('pair-msg');
+      let body;
+      if (mode === 'site') {
+        const code = $('site-code').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (!$('site-url').value.trim()) { msg.className = 'msg err'; msg.innerText = 'اكتب رابط موقع المستودع'; return; }
+        if (code.length !== 8) { msg.className = 'msg err'; msg.innerText = 'الرمز 8 خانات (مثل ABCD-EFGH)'; return; }
+        body = { mode: 'site', siteUrl: $('site-url').value.trim(), code };
+      } else {
+        const code = $('pair-code').value.replace(/\D/g, '');
+        if (code.length !== 6) { msg.className = 'msg err'; msg.innerText = 'الرمز 6 أرقام'; return; }
+        body = { code, serverAddress: $('server-address').value.trim() };
+      }
+      const btn = $('btn-pair');
+      btn.disabled = true; btn.innerText = 'جاري الربط...';
+      msg.className = 'msg'; msg.innerText = '';
+      try {
+        const r = await api('POST', '/api/client/pair', body);
+        if (r.ok) { msg.className = 'msg ok'; msg.innerText = '✅ تم الربط'; $('pair-code').value = ''; $('site-code').value = ''; }
+        else {
+          msg.className = 'msg err';
+          msg.innerText = r.reason === 'wrong_code' ? (mode === 'site' ? 'الرمز غير صحيح أو انتهت صلاحيته — اطلب رمز جديد من الموقع' : 'الرمز غير صحيح')
+            : r.reason === 'too_many_attempts' ? 'محاولات كثيرة، انتظر شوي وحاول'
+            : r.reason === 'bad_url' ? (r.message || 'رابط الموقع غير صحيح')
+            : mode === 'site' ? 'تعذر الوصول لموقع المستودع — تأكد من الرابط والإنترنت'
+            : 'ما لقى الجهاز الرئيسي — تأكد إنه شغال';
+          if (mode === 'lan' && r.reason === 'not_found') $('manual-address').classList.remove('hidden');
+        }
+      } catch (e) { msg.className = 'msg err'; msg.innerText = 'تعذر الاتصال بالبرنامج'; }
+      btn.disabled = false; btn.innerText = 'ربط';
+      refresh();
+    }
+
+    for (const id of ['pair-code', 'site-code', 'site-url']) $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') pairDevice(); });
+    refresh();
+    setInterval(refresh, 3000);
+  </script>
+</body>
+</html>

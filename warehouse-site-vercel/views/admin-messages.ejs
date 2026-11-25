@@ -1,0 +1,38 @@
+<%- include('partials/head', { nav: 'messages', wide: true }) %>
+
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>رسائل العملاء في واتساب</h1>
+  </div>
+</div>
+
+<%- include('partials/program-status', { program: program, now: now }) %>
+
+<div class="kpis kpis-3">
+  <div class="kpi"><span class="kpi-label">تنتظر الإرسال الحين</span><span class="kpi-value"><%= stats.pending %></span></div>
+  <div class="kpi"><span class="kpi-label">أُرسلت اليوم</span><span class="kpi-value"><%= stats.sentToday %></span></div>
+  <div class="kpi"><span class="kpi-label">ما أُرسلت اليوم</span><span class="kpi-value<%= stats.failedToday ? ' text-danger' : '' %>"><%= stats.failedToday %></span></div>
+</div>
+
+<div class="dash-grid">
+  <div class="dash-col">
+    <%- include('partials/status-messages-form', { action: '/admin/messages' }) %>
+  </div>
+
+  <div class="dash-col">
+    <%- include('partials/recent-messages') %>
+
+    <section class="card card-quiet">
+      <div class="card-title"><span class="card-icon"><%- icon('info') %></span><h2>كيف تشتغل؟</h2></div>
+      <ul class="plain-list">
+        <li>الرسالة تروح لقروب العميل اللي اسمه فيه رقم العميل (نفس طريقة إرسال الفواتير).</li>
+        <li>الفسح اللي ما فيه رقم عميل واضح، أو للعميل النقدي، ما تنرسل له رسائل.</li>
+        <li>لو صار أكثر من تغيير بسرعة، يوصل العميل آخر رسالة بس.</li>
+        <li>نفس الرسالة ما تتكرر للعميل حتى لو صحّحت الحالة ورجعت.</li>
+        <li>الفواتير والمستندات لها الأولوية في الإرسال، والرسائل تمشي على نفس المهلة بين الرسائل.</li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+<%- include('partials/foot') %>

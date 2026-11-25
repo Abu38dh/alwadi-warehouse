@@ -1,0 +1,31 @@
+<%- include('partials/head') %>
+
+<div class="auth-wrap auth-wrap-single">
+<div class="auth-box">
+  <img class="auth-logo auth-logo-always" src="/static/img/logo.png" alt="الوادي لقطع غيار السيارات" width="260" height="53">
+  <h1>إنشاء حساب الإدارة</h1>
+  <p class="card-sub auth-note">هذه الصفحة تظهر مرة واحدة فقط لإنشاء أول حساب. بعدها الإدارة هي اللي تنشئ باقي الحسابات.</p>
+
+  <% if (error) { %><div class="alert alert-danger" role="alert"><%- icon('alert') %><span><%= error %></span></div><% } %>
+
+  <form method="post" action="/setup" class="form" autocomplete="off">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <% if (needsToken) { %>
+      <label for="setup_token">رمز الإنشاء (SETUP_TOKEN من ملف .env)</label>
+      <input class="input" id="setup_token" name="setup_token" type="password" dir="ltr" autocomplete="off" required>
+    <% } %>
+    <label for="full_name">الاسم</label>
+    <input class="input" id="full_name" name="full_name" type="text" value="<%= values.full_name || '' %>" maxlength="80" required>
+    <label for="username">اسم المستخدم (إنجليزي)</label>
+    <input class="input" id="username" name="username" type="text" value="<%= values.username || '' %>" dir="ltr"
+           autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <label for="password">كلمة المرور (8 خانات أو أكثر)</label>
+    <input class="input" id="password" name="password" type="password" dir="ltr" autocomplete="new-password" minlength="8" required>
+    <label for="password2">تأكيد كلمة المرور</label>
+    <input class="input" id="password2" name="password2" type="password" dir="ltr" autocomplete="new-password" minlength="8" required>
+    <button type="submit" class="btn btn-primary btn-block">إنشاء الحساب</button>
+  </form>
+</div>
+</div>
+
+<%- include('partials/foot') %>

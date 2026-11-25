@@ -1,0 +1,200 @@
+<%- include('partials/head', { nav: 'reports', wide: true }) %>
+<%
+  var p = r.period;
+  function qs(extra) {
+    var o = { period: p.key === 'custom' ? '' : p.key, from: p.key === 'custom' ? p.fromDay : '', to: p.key === 'custom' ? p.toDay : '', branch: r.branch || '' };
+    for (var k in extra) o[k] = extra[k];
+    if (o.period) { o.from = ''; o.to = ''; }
+    var parts = [];
+    for (var key in o) if (o[key]) parts.push(key + '=' + encodeURIComponent(o[key]));
+    return parts.length ? '?' + parts.join('&') : '';
+  }
+  function mins(m) { return m == null ? '—' : minutesText(m); }
+  var s = r.summary;
+  var empty = !s.received && !s.prepared && !s.handed && !r.shortages.length;
+  var maxDay = Math.max.apply(null, r.series.map(function (x) { return x.received; }).concat([0]));
+  var labelEvery = Math.max(1, Math.ceil(r.series.length / 10));
+  function bucketLabel(k) { return r.byMonth ? k : k.slice(5).replace('-', '/'); }
+%>
+
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>التقارير</h1>
+  </div>
+  <a class="btn btn-primary" href="/admin/reports/export.xlsx<%= qs({}) %>"><%- icon('download') %> تحميل Excel</a>
+</div>
+
+<% if (error) { %><div class="alert alert-danger" role="alert"><%- icon('alert') %><span><%= error %></span></div><% } %>
+
+<section class="card report-filters">
+  <nav class="chips" aria-label="الفترة">
+    <span class="chips-label"><%- icon('clock') %> الفترة:</span>
+    <% periods.forEach(function (x) { %>
+      <a class="chip<%= p.key === x.key ? ' active' : '' %>" href="/admin/reports<%= qs({ period: x.key }) %>"><%= x.label %></a>
+    <% }) %>
+  </nav>
+  <form class="report-range" method="get" action="/admin/reports">
+    <label>من <input class="input" type="date" name="from" value="<%= p.fromDay %>" dir="ltr" required></label>
+    <label>إلى <input class="input" type="date" name="to" value="<%= p.toDay %>" dir="ltr" required></label>
+    <% if (r.branch) { %><input type="hidden" name="branch" value="<%= r.branch %>"><% } %>
+    <button type="submit" class="btn btn-ghost">تطبيق</button>
+  </form>
+  <% if (branchNames.length > 1) { %>
+    <nav class="chips" aria-label="الفرع">
+      <span class="chips-label"><%- icon('warehouse') %> الفرع:</span>
+      <a class="chip<%= !r.branch ? ' active' : '' %>" href="/admin/reports<%= qs({ branch: '' }) %>">كل الفروع</a>
+      <% branchNames.forEach(function (b) { %>
+        <a class="chip<%= r.branch === b ? ' active' : '' %>" href="/admin/reports<%= qs({ branch: b }) %>">فرع <%= b %></a>
+      <% }) %>
+    </nav>
+  <% } %>
+</section>
+
+<h2 class="report-title"><%= p.label %><% if (p.key !== 'custom' && p.fromDay !== p.toDay) { %> <span class="muted">(<%= p.fromDay %> إلى <%= p.toDay %>)</span><% } else if (p.key !== 'custom') { %> <span class="muted">(<%= p.fromDay %>)</span><% } %> — <%= r.branch ? 'فرع ' + r.branch : 'كل الفروع' %></h2>
+
+<% if (empty) { %>
+  <section class="card"><p class="all-good"><%- icon('info') %> ما فيه أي حركة في هذي الفترة<%= r.branch ? ' لهذا الفرع' : '' %>.</p></section>
+<% } else { %>
+
+<%# ---------- الأرقام الأساسية ---------- %>
+<section class="card">
+  <div class="card-title"><span class="card-icon"><%- icon('chart') %></span><h2>الأرقام</h2></div>
+  <div class="rep-stages">
+    <div class="rep-stage"><span class="rep-stage-label">وصل المستودع</span><span class="rep-stage-value"><%= s.received %></span></div>
+    <div class="rep-stage"><span class="rep-stage-label">انتهى تجهيزه</span><span class="rep-stage-value"><%= s.prepared %></span></div>
+    <div class="rep-stage"><span class="rep-stage-label">انسلّم للموصل</span><span class="rep-stage-value"><%= s.handed %></span></div>
+  </div>
+
+  <h3 class="rep-sub"><%- icon('clock') %> الأوقات (متوسط)</h3>
+  <div class="rep-times">
+    <div class="rep-time"><span class="rep-time-label">من الوصول لين يبدأ التجهيز</span><span class="rep-time-value"><%= mins(s.avgWait) %></span></div>
+    <div class="rep-time"><span class="rep-time-label">مدة التجهيز</span><span class="rep-time-value"><%= mins(s.avgPrep) %></span></div>
+    <div class="rep-time"><span class="rep-time-label">من الوصول لين التسليم</span><span class="rep-time-value"><%= mins(s.avgTotal) %></span></div>
+  </div>
+
+</section>
+
+<%# ---------- كل يوم ---------- %>
+<% if (r.series.length > 1) { %>
+<section class="card">
+  <div class="card-title"><span class="card-icon tone-received"><%- icon('inbox') %></span><h2>الفسوحات اللي وصلت كل <%= r.byMonth ? 'شهر' : 'يوم' %></h2></div>
+  <div class="bar-chart" role="img" aria-label="عدد الفسوحات اللي وصلت كل <%= r.byMonth ? 'شهر' : 'يوم' %> — الأرقام في الجدول تحت">
+    <div class="bar-axis"><span><%= maxDay %></span><span>0</span></div>
+    <div class="bar-plot">
+      <% r.series.forEach(function (x, i) { %>
+        <div class="bar-col" tabindex="0">
+          <div class="bar bh-<%= maxDay && x.received ? Math.max(1, Math.round(x.received / maxDay * 20)) : 0 %>"></div>
+          <span class="bar-tip"><strong><%= bucketLabel(x.key) %></strong> وصل <%= x.received %> · تجهّز <%= x.prepared %> · انسلّم <%= x.handed %></span>
+          <span class="bar-label"><%= i % labelEvery === 0 ? bucketLabel(x.key) : '' %></span>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+  <details class="report-table-toggle">
+    <summary class="summary-link"><%- icon('eye') %> عرض الأرقام <%= r.byMonth ? 'لكل شهر' : 'لكل يوم' %></summary>
+    <div class="branch-scroll">
+      <table class="branch-table">
+        <thead><tr><th><%= r.byMonth ? 'الشهر' : 'اليوم' %></th><th>وصل</th><th>تجهّز</th><th>انسلّم</th></tr></thead>
+        <tbody>
+          <% r.series.forEach(function (x) { %><tr><td dir="ltr" class="td-start"><%= x.key %></td><td><%= x.received %></td><td><%= x.prepared %></td><td><%= x.handed %></td></tr><% }) %>
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+<% } %>
+
+<%# ---------- حسب الفرع ---------- %>
+<% if (r.branches.length > 1) { %>
+<section class="card">
+  <div class="card-title"><span class="card-icon tone-gold"><%- icon('warehouse') %></span><h2>حسب الفرع</h2></div>
+  <div class="branch-scroll">
+    <table class="branch-table">
+      <thead><tr><th>الفرع</th><th class="num">وصل</th><th class="num">تجهّز</th><th class="num">انسلّم</th><th class="num">متوسط التجهيز</th><th class="num">متوسط المدة كاملة</th><th class="num">نواقص</th></tr></thead>
+      <tbody>
+        <% r.branches.forEach(function (b) { %>
+          <tr>
+            <td><a href="/admin/reports<%= qs({ branch: b.name }) %>"><strong>فرع <%= b.name %></strong></a></td>
+            <td class="num"><%= b.received %></td><td class="num"><%= b.prepared %></td><td class="num"><%= b.handed %></td>
+            <td class="num"><%= mins(b.avgPrep) %></td><td class="num"><%= mins(b.avgTotal) %></td>
+            <td class="num <%= b.shortages ? 'text-danger' : '' %>"><%= b.shortages %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+<% } %>
+
+<div class="rep-grid">
+  <section class="card">
+    <div class="card-title"><span class="card-icon tone-preparing"><%- icon('package') %></span><h2>الموظفون (مين جهّز)</h2></div>
+    <% if (!r.workers.length) { %><p class="card-sub card-sub-end">ما انتهى تجهيز أي فسح في هذي الفترة.</p><% } else { %>
+      <table class="rep-table">
+        <thead><tr><th>الموظف</th><th class="num">فسوحات</th><th class="num">أصناف</th><th class="num">قطع</th><th class="num">متوسط وقته</th></tr></thead>
+        <tbody>
+          <% r.workers.forEach(function (w) { %><tr>
+            <td><strong><%= w.name %></strong><% if (!r.branch && w.branch) { %><span class="rep-cell-sub">فرع <%= w.branch %></span><% } %></td>
+            <td class="num"><%= w.count %></td>
+            <td class="num"><span class="rep-count"><%= w.items || '—' %></span></td>
+            <td class="num"><%= w.qty || '—' %></td>
+            <td class="num"><%= mins(w.avgPrep) %></td>
+          </tr><% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </section>
+
+  <section class="card">
+    <div class="card-title"><span class="card-icon tone-handed"><%- icon('truck') %></span><h2>الموصلون (مين استلم)</h2></div>
+    <% if (!r.couriers.length) { %><p class="card-sub card-sub-end">ما انسلّم أي فسح في هذي الفترة.</p><% } else { %>
+      <table class="rep-table">
+        <thead><tr><th>الموصل</th><th class="num">استلم</th></tr></thead>
+        <tbody>
+          <% r.couriers.forEach(function (c) { %><tr>
+            <td><strong><%= c.name %></strong><% if (!r.branch && c.branch) { %><span class="rep-cell-sub">فرع <%= c.branch %></span><% } %></td>
+            <td class="num"><span class="rep-count"><%= c.count %></span></td>
+          </tr><% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </section>
+
+  <section class="card">
+    <div class="card-title"><span class="card-icon"><%- icon('users') %></span><h2>أكثر العملاء فسوحات</h2></div>
+    <% if (!r.customers.length) { %><p class="card-sub card-sub-end">ما وصل فسح برقم عميل في هذي الفترة.</p><% } else { %>
+      <table class="rep-table">
+        <thead><tr><th>العميل</th><th class="num">فسوحات</th></tr></thead>
+        <tbody>
+          <% r.customers.forEach(function (c) { %><tr>
+            <td><strong dir="ltr"><%= c.number %></strong><% if (c.name) { %><span class="rep-cell-sub"><%= c.name %></span><% } %></td>
+            <td class="num"><span class="rep-count"><%= c.count %></span></td>
+          </tr><% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </section>
+</div>
+
+<%# ---------- النواقص ---------- %>
+<% if (r.shortages.length) { %>
+<section class="card">
+  <div class="card-title"><span class="card-icon tone-danger"><%- icon('alert') %></span><h2>النواقص اللي انسجلت (<%= r.shortages.length %>)</h2></div>
+  <ul class="item-list">
+    <% r.shortages.forEach(function (x) { %>
+      <li>
+        <a class="item-link" href="/documents/<%= x.doc_id %>"><strong><%= x.docTitle %></strong><% if (x.customer_name) { %><span class="muted"> · <%= x.customer_name %></span><% } %></a>
+        <div class="item-text">ناقص: <%= x.text %></div>
+        <div class="item-meta">
+          سجّله <%= x.user_name || '—' %> · <%= formatRiyadh(x.created_at) %><%= x.branch && !r.branch ? ' · فرع ' + x.branch : '' %> ·
+          <% if (x.resolution) { %><span class="text-success">انحل: <%= x.resolution %></span><% } else { %><span class="text-danger">للحين مفتوح</span><% } %>
+        </div>
+      </li>
+    <% }) %>
+  </ul>
+</section>
+<% } %>
+
+<% } %>
+
+<%- include('partials/foot') %>

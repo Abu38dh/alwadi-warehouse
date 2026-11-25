@@ -1,0 +1,43 @@
+<%- include('partials/head', { nav: 'whatsapp', wide: true }) %>
+<%- include('partials/wa-tabs') %>
+
+
+
+<div class="dash-grid">
+  <div class="dash-col">
+    <%# ---------- ١) مع المستند ---------- %>
+    <% if (!captions) { %>
+      <section class="card"><p><%- icon('alert') %> نظام الإرسال ما يرد الحين، فنصوص المستندات ما تقدر تنعرض. حدّث الصفحة بعد ثواني.</p></section>
+    <% } else { %>
+    <form method="post" action="/admin/whatsapp/messages/captions" class="card" data-once>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="back" value="/admin/whatsapp/messages">
+      <div class="card-title"><span class="card-icon"><%- icon('file') %></span><h2>١) النص اللي ينكتب مع المستند</h2></div>
+      <% docTypes.forEach(function (t) { %>
+        <label for="cap-<%= t.id %>" class="field-label">مع <%= t.label %></label>
+        <textarea class="input" id="cap-<%= t.id %>" name="caption_<%= t.id %>" rows="2" maxlength="1000" placeholder="<%= captions.defaults[t.id] || '' %>"><%= captions.values[t.id] || '' %></textarea>
+      <% }) %>
+      <button type="submit" class="btn btn-primary btn-block">حفظ نصوص المستندات</button>
+    </form>
+    <% } %>
+
+    <%# ---------- ٢) حالة الطلب ---------- %>
+    <%- include('partials/status-messages-form', { action: '/admin/whatsapp/messages/status', formTitle: '٢) رسائل حالة الطلب' }) %>
+  </div>
+
+  <div class="dash-col">
+    <section class="card">
+      <div class="card-title"><span class="card-icon"><%- icon('chart') %></span><h2>رسائل حالة الطلب اليوم</h2></div>
+      <div class="kpis kpis-3">
+        <div class="kpi"><span class="kpi-label">تنتظر الإرسال</span><span class="kpi-value"><%= stats.pending %></span></div>
+        <div class="kpi"><span class="kpi-label">أُرسلت</span><span class="kpi-value"><%= stats.sentToday %></span></div>
+        <div class="kpi"><span class="kpi-label">ما أُرسلت</span><span class="kpi-value<%= stats.failedToday ? ' text-danger' : '' %>"><%= stats.failedToday %></span></div>
+      </div>
+    </section>
+
+    <%- include('partials/recent-messages') %>
+
+  </div>
+</div>
+
+<%- include('partials/foot') %>

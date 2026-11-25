@@ -1,0 +1,42 @@
+<%- include('partials/head', { nav: 'documents', wide: true }) %>
+
+<a class="back" href="/documents/<%= doc.id %>"><%- icon('back') %> رجوع للفسح</a>
+
+<div class="viewer-bar">
+  <h1>مقارنة نسخ <%= doc.title %></h1>
+  <div class="viewer-tools">
+    <button type="button" class="icon-btn icon-btn-boxed" id="zoom-out" aria-label="تصغير"><%- icon('zoomOut') %></button>
+    <span class="viewer-zoom" id="zoom-label">100%</span>
+    <button type="button" class="icon-btn icon-btn-boxed" id="zoom-in" aria-label="تكبير"><%- icon('zoomIn') %></button>
+  </div>
+</div>
+
+<% if (versions.length > 2) { %>
+  <form class="report-range compare-pick" method="get" action="/documents/<%= doc.id %>/compare">
+    <label>القديمة
+      <select class="input" name="a"><% versions.forEach(function (f) { %><option value="<%= f.version %>"<%= f.version === older.version ? ' selected' : '' %>>النسخة <%= f.version %> — <%= formatRiyadh(f.created_at) %></option><% }) %></select>
+    </label>
+    <label>الجديدة
+      <select class="input" name="b"><% versions.forEach(function (f) { %><option value="<%= f.version %>"<%= f.version === newer.version ? ' selected' : '' %>>النسخة <%= f.version %> — <%= formatRiyadh(f.created_at) %></option><% }) %></select>
+    </label>
+    <button type="submit" class="btn btn-ghost">تطبيق</button>
+  </form>
+<% } %>
+
+<p class="page-intro">يمين: القديمة · يسار: الجديدة</p>
+
+<div class="compare-grid">
+  <section class="compare-col">
+    <h2 class="compare-head">النسخة <%= older.version %> <span class="muted small">(القديمة — <%= formatRiyadh(older.created_at) %>)</span></h2>
+    <div class="viewer-status" id="status-old" role="status">جاري تحميل الملف...</div>
+    <div class="viewer-pages" data-status-id="status-old" data-src="/documents/<%= doc.id %>/pdf-data?v=<%= older.version %>"></div>
+  </section>
+  <section class="compare-col">
+    <h2 class="compare-head">النسخة <%= newer.version %> <span class="muted small">(<%= newer.version === latestVersion ? 'الأحدث' : 'الجديدة' %> — <%= formatRiyadh(newer.created_at) %>)</span></h2>
+    <div class="viewer-status" id="status-new" role="status">جاري تحميل الملف...</div>
+    <div class="viewer-pages" data-status-id="status-new" data-src="/documents/<%= doc.id %>/pdf-data?v=<%= newer.version %>"></div>
+  </section>
+</div>
+
+<script type="module" src="/static/js/viewer.js?v=<%= assetVersion %>"></script>
+<%- include('partials/foot') %>

@@ -1,0 +1,56 @@
+<% var now = Date.now(); %>
+<% var searching = !!locals.search; %>
+<% var showBranch = (locals.branchFilter || []).length > 1; %>
+<% if (documents.length === 0) { %>
+  <div class="empty">
+    <span class="empty-icon"><%- icon(searching ? 'search' : (STATUS_ICONS[status] || 'file')) %></span>
+    <% if (searching) { %><strong>ما لقيت شيء<%= (locals.handedMatches || []).length ? ' مفتوح' : '' %>.</strong>
+    <% } else if (status === 'all') { %><strong>ما فيه فسوحات</strong>
+    <% } else if (status === 'received') { %><strong>ما فيه فسوحات جديدة</strong>
+    <% } else if (status === 'preparing') { %><strong>ما فيه شيء قيد التجهيز</strong>
+    <% } else if (status === 'prepared') { %><strong>ما فيه شيء جاهز</strong>
+    <% } else { %><strong>ما فيه مستندات مسلّمة</strong><% } %>
+  </div>
+<% } else { %>
+
+  <%# كل فسح في سطره، ومعه مراحله الأربع والوقت تحت كل مرحلة (نفس الشكل في الكمبيوتر والجوال) %>
+  <% var ORDER = ['received', 'preparing', 'prepared', 'handed_to_courier']; %>
+  <div class="tl-list">
+    <% documents.forEach(function (d) { %>
+      <% var cur = ORDER.indexOf(d.status); %>
+      <% var steps = [
+        { label: 'وصل', at: d.received_at, who: '' },
+        { label: 'بدأ التجهيز', at: d.prep_started_at, who: d.preparer_name || '' },
+        { label: 'تم التجهيز', at: d.prepared_at, who: '' },
+        { label: 'سُلّم للموصل', at: d.handed_over_at, who: d.courier_name || '' }
+      ]; %>
+      <a class="tl-row" href="/documents/<%= d.id %>">
+        <span class="tl-info">
+          <span class="tl-title"><%= d.title %></span>
+          <span class="tl-customer">
+            <% if (d.customer_name) { %><%= d.customer_name %><% } %><% if (d.customer_number) { %><%= d.customer_name ? ' · ' : '' %>عميل <%= d.customer_number %><% } %><% if (!d.customer_name && !d.customer_number) { %><span class="text-warn">العميل غير معروف</span><% } %>
+            <% if (showBranch && d.branch) { %><span class="tl-branch"> · فرع <%= d.branch %></span><% } %>
+          </span>
+          <% if (d.problems.length || d.modified_flag || d.has_open_shortage) { %>
+            <span class="badges">
+              <% if (d.has_open_shortage) { %><span class="badge badge-danger">نقص مفتوح</span><% } %>
+              <% if (d.problems.length) { %><span class="badge badge-warn">بيانات ناقصة</span><% } %>
+              <% if (d.modified_flag) { %><span class="badge badge-info">تعدّل</span><% } %>
+            </span>
+          <% } %>
+        </span>
+        <ol class="tl" aria-label="مراحل <%= d.title %>">
+          <% steps.forEach(function (st, i) { %>
+            <% var state = i <= cur ? 'done' : (i === cur + 1 ? 'next' : 'todo'); %>
+            <li class="tl-step tl-<%= state %> st-<%= ORDER[i] %>">
+              <span class="tl-dot"><% if (state === 'done') { %><%- icon('check') %><% } %></span>
+              <span class="tl-label"><%= st.label %></span>
+              <% if (state === 'done' && st.at) { %><span class="tl-time"><%= formatStep(st.at, now) %></span><% } %>
+              <% if (state === 'done' && st.who) { %><span class="tl-who"><%= st.who %></span><% } %>
+            </li>
+          <% }) %>
+        </ol>
+      </a>
+    <% }) %>
+  </div>
+<% } %>

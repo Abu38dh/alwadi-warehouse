@@ -1,0 +1,10 @@
+<%# حالة برنامج الإرسال وواتساب (للإدارة) — يحتاج: program, now %>
+<% if (program.state === 'ok') { %>
+  <div class="program-status ps-ok"><%- icon('checkCircle') %><span><strong>واتساب الشركة متصل.</strong> آخر تواصل <%= timeAgoAr(program.heartbeat.at, now) %>.</span></div>
+<% } else if (program.state === 'wa_down') { %>
+  <div class="program-status ps-bad"><%- icon('alert') %><span><strong>واتساب الشركة منقطع منذ <%= durationSince(program.since, now) %>.</strong> الرسائل تنتظر ولا تنرسل. <% if (engineEnabled) { %>افتح <a href="/admin/whatsapp">واتساب والإرسال</a> وتأكد إن واتساب متصل (يمكن يحتاج مسح الباركود).<% } else { %>افتح البرنامج على جهاز الشركة وتأكد إن واتساب متصل.<% } %></span></div>
+<% } else if (program.state === 'offline') { %>
+  <div class="program-status ps-bad"><%- icon('alert') %><span><strong>البرنامج ما تواصل مع الموقع منذ <%= durationSince(program.since, now) %>.</strong> <% if (engineEnabled) { %>برنامج الإرسال داخل الموقع متوقف — افتح <a href="/admin/whatsapp">واتساب والإرسال</a>.<% } else { %>يمكن جهاز الشركة مطفي أو البرنامج مقفل أو ما فيه إنترنت.<% } %></span></div>
+<% } else { %>
+  <div class="program-status ps-idle"><%- icon('info') %><span><strong>برنامج الإرسال ما تواصل مع الموقع للحين.</strong> <% if (engineEnabled) { %>نظام الإرسال يتجهز — افتح <a href="/admin/whatsapp">واتساب والإرسال</a>.<% } else { %>بعد تحديث البرنامج وربطه، تظهر هنا حالة واتساب.<% } %></span></div>
+<% } %>

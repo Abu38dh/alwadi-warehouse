@@ -1,0 +1,25 @@
+<%# نموذج رسائل حالة الطلب — يحتاج: action, config, events, eventLabels, example, error (اختياري: formTitle, formIntro) %>
+<form method="post" action="<%= action %>" class="card" data-once>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="card-title"><span class="card-icon"><%- icon('message') %></span><h2><%= locals.formTitle || 'نصوص الرسائل' %></h2></div>
+  <% if (error) { %><div class="alert alert-danger" role="alert"><%- icon('alert') %><span><%= error %></span></div><% } %>
+  <% if (locals.formIntro) { %><p class="card-sub"><%- formIntro %></p><% } %>
+  <p class="card-sub">تقدر تكتب: <code class="ph">{رقم_الفاتورة}</code> <code class="ph">{اسم_العميل}</code> <code class="ph">{التاريخ}</code></p>
+
+  <% events.forEach(function (ev) { var e = config.events[ev]; %>
+    <div class="msg-event<%= e.enabled ? ' is-on' : '' %>">
+      <label class="switch-row">
+        <input type="checkbox" name="enabled_<%= ev %>" value="1"<%= e.enabled ? ' checked' : '' %>>
+        <span class="switch-text"><strong><%= eventLabels[ev] %></strong><span class="muted small"><%= e.enabled ? 'ترسل للعميل' : 'موقوفة' %></span></span>
+      </label>
+      <label for="text_<%= ev %>" class="sr-only">نص رسالة <%= eventLabels[ev] %></label>
+      <textarea class="input" id="text_<%= ev %>" name="text_<%= ev %>" rows="2" maxlength="500" required><%= e.text %></textarea>
+      <div class="msg-example"><span class="muted small">مثال على اللي يوصل للعميل:</span> <span class="bubble"><%= example(e.text) %></span></div>
+    </div>
+  <% }) %>
+
+  <label for="max_age_minutes" class="field-label">الرسالة اللي ما انرسلت خلال كم دقيقة تنلغي؟ (مثلاً لو واتساب كان منقطع)</label>
+  <input class="input input-short" id="max_age_minutes" name="max_age_minutes" type="number" lang="en" dir="ltr" min="5" max="1440" value="<%= config.max_age_minutes %>" required>
+
+  <button type="submit" class="btn btn-primary btn-block">حفظ</button>
+</form>
